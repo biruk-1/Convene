@@ -1,0 +1,54 @@
+[
+  {
+    "id": 1,
+    "profileImage": "profile1", 
+    "profileName": "John Doe",         
+    "profileTitle": "Photographer",   
+    "postImage": "hick1", 
+    "description": "Beautiful sunset!",
+    "likes": 120,
+    "comments": [
+      { "id": 1, "text": "Amazing view!" },
+      { "id": 2, "text": "So peaceful!" }
+    ]
+  },
+  {
+    "id": 2,
+    "profileImage": "profile2", 
+    "profileName": "Jane Smith",      
+    "profileTitle": "Food Blogger",   
+    "postImage": "hick2", 
+    "description": "Delicious food!",
+    "likes": 90,
+    "comments": [
+      { "id": 1, "text": "Looks tasty!" },
+      { "id": 2, "text": "I want to try this!" }
+    ]
+  },
+  {
+    "id": 1,
+    "profileImage": "profile1", 
+    "profileName": "John Doe",         
+    "profileTitle": "Photographer",   
+    "postImage": "hick1", 
+    "description": "Beautiful sunset!",
+    "likes": 120,
+    "comments": [
+      { "id": 1, "text": "Amazing view!" },
+      { "id": 2, "text": "So peaceful!" }
+    ]
+  },
+  {
+    "id": 2,
+    "profileImage": "profile2", 
+    "profileName": "Jane Smith",      
+    "profileTitle": "Food Blogger",   
+    "postImage": "hick2", 
+    "description": "Delicious food!",
+    "likes": 90,
+    "comments": [
+      { "id": 1, "text": "Looks tasty!" },
+      { "id": 2, "text": "I want to try this!" }
+    ]
+  }
+]
