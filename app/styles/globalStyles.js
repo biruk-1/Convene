@@ -64,12 +64,12 @@ export const globalStyles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fd61e3', // Pink color for the title
+    color: '#cc0077', // Pink color for the title
     marginBottom: 20,
   },
   inputPinkBorder: {
     width: '80%', // Full-width input
-    borderColor: '#fd61e3', // Pink border
+    borderColor: '#cc0077', // Pink border
     borderWidth: 2,
     padding: 10,
     borderRadius: 10,
@@ -79,7 +79,7 @@ export const globalStyles = StyleSheet.create({
   fullButtonPink: {
     width: '80%',
     padding: 15,
-    backgroundColor: '#fd61e3', // Pink background for button
+    backgroundColor: '#cc0077', // Pink background for button
     borderRadius: 10,
     alignItems: 'center',
   },

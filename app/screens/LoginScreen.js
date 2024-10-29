@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Alert, Image, TouchableOpacity } from 'react-native';
 import { globalStyles } from '../styles/globalStyles';
 import usersData from '../Data/users.json';
-import PropTypes from 'prop-types'; // Import PropTypes for validation
+import PropTypes from 'prop-types';
+import { useAuth } from './AuthContext'; // Import useAuth from AuthContext
 
 const LoginScreen = ({ navigation }) => {
-  // State variables for username and password
+  const { login } = useAuth(); // Get login function from auth context
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  // Function to handle login
   const handleLogin = () => {
-    // Find the user with matching credentials
     const user = usersData.find(
       (user) => user.username === username && user.password === password
     );
-    
-    // Navigate to Feed screen if user is found, otherwise show alert
+
     if (user) {
-      navigation.navigate('Feed'); // This navigates to the Feed screen
+      login(username);  // Set the user in AuthContext
+      navigation.navigate('Feed');  // Navigate to the Feed screen
     } else {
       Alert.alert('Invalid credentials', 'Please try again.');
     }
@@ -26,33 +25,25 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={globalStyles.container}>
-      {/* Logo at the top */}
-      <Image 
-        source={require('../../assets/images/logo.png')} 
-        style={globalStyles.logo} 
-      />
-      
+      <Image source={require('../../assets/images/logo.png')} style={globalStyles.logo} />
       <Text style={globalStyles.title}>Login</Text>
 
-      {/* Username Input */}
       <TextInput
-        style={globalStyles.inputPinkBorder} // New style with pink border
+        style={globalStyles.inputPinkBorder}
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
-        autoCapitalize="none" // Prevent auto-capitalization
+        autoCapitalize="none"
       />
 
-      {/* Password Input */}
       <TextInput
-        style={globalStyles.inputPinkBorder} // New style with pink border
+        style={globalStyles.inputPinkBorder}
         placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
 
-      {/* Full-width Pink Login Button */}
       <TouchableOpacity style={globalStyles.fullButtonPink} onPress={handleLogin}>
         <Text style={globalStyles.buttonText}>Login</Text>
       </TouchableOpacity>
@@ -60,7 +51,6 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-// PropTypes validation
 LoginScreen.propTypes = {
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,

@@ -87,16 +87,16 @@ const styles = StyleSheet.create({
     width: '100%', // Full width to center the button
   },
   button: {
-    backgroundColor: '#fd61e3', // Retained pink color for consistency
+    backgroundColor: '#cc0077', // Retained pink color for consistency
     paddingVertical: 10,
-    paddingHorizontal: 30, // Adjusted padding for button
-    borderRadius: 8, // Rounded corners
+    paddingHorizontal: 60, // Adjusted padding for button
+    borderRadius: 5, // Rounded corners
     elevation: 2, // Shadow for button
   },
   buttonText: {
     color: '#ffffff',
     fontSize: 16,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
   },
 });
 

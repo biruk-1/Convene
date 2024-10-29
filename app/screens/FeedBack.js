@@ -58,9 +58,9 @@ const Feedback = () => {
           ))}
         </View>
         {currentQuestion < questions.length - 1 ? (
-          <Button style = {{backgroundColor : "#fd61e3"}} title="Continue" onPress={handleNext} disabled={selectedOption === null} />
+          <Button style = {styles.button} title="Continue" onPress={handleNext} disabled={selectedOption === null} />
         ) : (
-          <Button title="Submit Feedback" onPress={handleSubmit} />
+          <Button  style = {styles.button} title="Submit Feedback" onPress={handleSubmit} />
         )}
       </ScrollView>
     </View>
@@ -71,6 +71,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  button :{
+    backgroundColor:'#cc0077',
   },
   question: {
     fontSize: 18,
@@ -87,7 +90,7 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   selectedOption: {
-    backgroundColor: '#fd61e3',
+    backgroundColor: '#cc0077',
   },
   optionText: {
     textAlign: 'center',
@@ -105,7 +108,7 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   activeDot: {
-    backgroundColor: '#fd61e3',
+    backgroundColor: '#cc0077',
   },
 });
 

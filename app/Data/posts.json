@@ -1,54 +1,39 @@
-[
-  {
-    "id": 1,
-    "profileImage": "profile1", 
-    "profileName": "John Doe",         
-    "profileTitle": "Photographer",   
-    "postImage": "hick1", 
-    "description": "Beautiful sunset!",
-    "likes": 120,
-    "comments": [
-      { "id": 1, "text": "Amazing view!" },
-      { "id": 2, "text": "So peaceful!" }
-    ]
-  },
-  {
-    "id": 2,
-    "profileImage": "profile2", 
-    "profileName": "Jane Smith",      
-    "profileTitle": "Food Blogger",   
-    "postImage": "hick2", 
-    "description": "Delicious food!",
-    "likes": 90,
-    "comments": [
-      { "id": 1, "text": "Looks tasty!" },
-      { "id": 2, "text": "I want to try this!" }
-    ]
-  },
-  {
-    "id": 1,
-    "profileImage": "profile1", 
-    "profileName": "John Doe",         
-    "profileTitle": "Photographer",   
-    "postImage": "hick1", 
-    "description": "Beautiful sunset!",
-    "likes": 120,
-    "comments": [
-      { "id": 1, "text": "Amazing view!" },
-      { "id": 2, "text": "So peaceful!" }
-    ]
-  },
-  {
-    "id": 2,
-    "profileImage": "profile2", 
-    "profileName": "Jane Smith",      
-    "profileTitle": "Food Blogger",   
-    "postImage": "hick2", 
-    "description": "Delicious food!",
-    "likes": 90,
-    "comments": [
-      { "id": 1, "text": "Looks tasty!" },
-      { "id": 2, "text": "I want to try this!" }
-    ]
-  }
-]
+{
+  "status": "success",
+  "result": [
+      {
+          "feed_id": "1",
+          "text_content": "Hello, I am excited to participate in this conference. I can't wait to hear it from you all!",
+          "img_url": "https:\/\/www.exordo.com\/blog\/wp-content\/uploads\/2023\/12\/Resized-image.jpeg",
+          "posted_by": "1",
+          "like_count": "0",
+          "posted_on": "2024-10-21 21:36:01",
+          "event": "1",
+          "participant_id": "1",
+          "first_name": "Beamlaku",
+          "middle_name": "Amare",
+          "last_name": "Workie",
+          "email": "bamlew@gmail.com",
+          "phone_number": "0913684983",
+          "position": "Sales Manager",
+          "pro_pic": "https:\/\/i.pinimg.com\/280x280_RS\/54\/36\/c6\/5436c6efc313051d05a432596dcdafda.jpg"
+      },
+      {
+          "feed_id": "2",
+          "text_content": "And ere we go, the final trip to hawassa",
+          "img_url": "https:\/\/wanderingdonut.com\/wp-content\/uploads\/2017\/11\/roadtrip-windscreen.jpg",
+          "posted_by": "1",
+          "like_count": "0",
+          "posted_on": "2024-10-21 21:36:01",
+          "event": "1",
+          "participant_id": "1",
+          "first_name": "Beamlaku",
+          "middle_name": "Amare",
+          "last_name": "Workie",
+          "email": "bamlew@gmail.com",
+          "phone_number": "0913684983",
+          "position": "Sales Manager",
+          "pro_pic": "https:\/\/i.pinimg.com\/280x280_RS\/54\/36\/c6\/5436c6efc313051d05a432596dcdafda.jpg"
+      }
+  ]
+}

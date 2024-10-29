@@ -1,0 +1,145 @@
+{
+    "status": "success",
+    "result": [
+        {
+            "schedile_id": "1",
+            "event_date": "2024-10-21",
+            "start_time": "09:00:00",
+            "end_time": "10:00:00",
+            "topic": "Welcome Speech",
+            "handler": "CEO",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "2",
+            "event_date": "2024-10-21",
+            "start_time": "10:00:00",
+            "end_time": "11:00:00",
+            "topic": "Sales Report",
+            "handler": "Sales Manager",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "3",
+            "event_date": "2024-10-21",
+            "start_time": "11:00:00",
+            "end_time": "12:00:00",
+            "topic": "Q and A session",
+            "handler": "Organizaer",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "4",
+            "event_date": "2024-10-21",
+            "start_time": "12:00:00",
+            "end_time": "14:00:00",
+            "topic": "Lunch",
+            "handler": "Yourself",
+            "location": "Haramber Restaurant",
+            "event": "1"
+        },
+        {
+            "schedile_id": "5",
+            "event_date": "2024-10-22",
+            "start_time": "09:00:00",
+            "end_time": "10:00:00",
+            "topic": "Marketing Report",
+            "handler": "CEO",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "6",
+            "event_date": "2024-10-22",
+            "start_time": "10:00:00",
+            "end_time": "11:00:00",
+            "topic": "Assessment Review",
+            "handler": "Sales Manager",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "7",
+            "event_date": "2024-10-22",
+            "start_time": "11:00:00",
+            "end_time": "12:00:00",
+            "topic": "Q and A session",
+            "handler": "Organizaer",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "8",
+            "event_date": "2024-10-22",
+            "start_time": "12:00:00",
+            "end_time": "14:00:00",
+            "topic": "Team Lunch",
+            "handler": "Yourself",
+            "location": "Haramber Restaurant",
+            "event": "1"
+        },
+        {
+            "schedile_id": "9",
+            "event_date": "2024-10-23",
+            "start_time": "09:00:00",
+            "end_time": "10:00:00",
+            "topic": "Last Report",
+            "handler": "CEO",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "10",
+            "event_date": "2024-10-23",
+            "start_time": "10:00:00",
+            "end_time": "11:00:00",
+            "topic": "Panel discussion",
+            "handler": "Sales Manager",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "11",
+            "event_date": "2024-10-23",
+            "start_time": "11:00:00",
+            "end_time": "12:00:00",
+            "topic": "Q and A session",
+            "handler": "Organizaer",
+            "location": "Yeha Grand Hall",
+            "event": "1"
+        },
+        {
+            "schedile_id": "12",
+            "event_date": "2024-10-23",
+            "start_time": "12:00:00",
+            "end_time": "14:00:00",
+            "topic": "Lunch",
+            "handler": "Yourself",
+            "location": "Haramber Restaurant",
+            "event": "1"
+        },
+        {
+            "schedile_id": "13",
+            "event_date": "2024-10-22",
+            "start_time": "14:00:00",
+            "end_time": "17:00:00",
+            "topic": "Feta",
+            "handler": "Yourself",
+            "location": "Anywhere",
+            "event": "1"
+        },
+        {
+            "schedile_id": "14",
+            "event_date": "2024-10-24",
+            "start_time": "17:00:00",
+            "end_time": "19:00:00",
+            "topic": "Late night meeting",
+            "handler": "Team",
+            "location": "Online from your room",
+            "event": "1"
+        }
+    ]
+}

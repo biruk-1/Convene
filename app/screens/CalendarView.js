@@ -1,240 +1,220 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Footer from '../Components/Footer';
+import dayjs from 'dayjs'; // Import Day.js
 
 const { width } = Dimensions.get('window');
 
 const CalendarView = () => {
-  const today = new Date();
-  const [currentWeek, setCurrentWeek] = useState(0); // State to track the current week being displayed
+  const today = dayjs(); // Use Day.js to get today's date
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [meetings, setMeetings] = useState([]);
+  const [eventDates, setEventDates] = useState([]);
 
-  // Generate 14 days of dates starting from today
-  const generateTwoWeeks = (weekOffset) => {
-    const dates = [];
-    const startDate = new Date(today);
-    startDate.setDate(today.getDate() + weekOffset * 14);
+  useEffect(() => {
+    fetch('https://zelesegna.com/convene/app/get_schedule.php?event=1')
+      .then((response) => response.json())
+      .then((data) => {
+        const formattedMeetings = data.result.map(meeting => {
+          const eventDate = dayjs(meeting.event_date); // Use Day.js
+          const startTime = dayjs(`${meeting.event_date}T${meeting.start_time}`);
+          const endTime = dayjs(`${meeting.event_date}T${meeting.end_time}`);
 
-    for (let i = 0; i < 14; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  };
+          return {
+            id: parseInt(meeting.schedile_id),
+            time: startTime.format('HH:mm'), // Format using Day.js
+            title: meeting.topic,
+            room: meeting.location,
+            date: eventDate.format('YYYY-MM-DD'), // Format date
+            startTime,
+            endTime,
+          };
+        });
 
-  const meetings = [
-    {
-      id: 1,
-      time: '8:00 AM',
-      title: 'Team Meeting',
-      room: 'Meeting Room 8',
-      date: today.toLocaleDateString(),
-      startTime: new Date(today.setHours(8, 0, 0)),
-      endTime: new Date(today.setHours(9, 0, 0)),
-    },
-    {
-      id: 2,
-      time: '12:00 PM',
-      title: 'Project Update',
-      room: 'Meeting Room 2',
-      date: today.toLocaleDateString(),
-      startTime: new Date(today.setHours(12, 0, 0)),
-      endTime: new Date(today.setHours(13, 0, 0)),
-    },
-    {
-      id: 3,
-      time: '4:00 PM',
-      title: 'Client Call',
-      room: 'Meeting Room 5',
-      date: today.toLocaleDateString(),
-      startTime: new Date(today.setHours(16, 0, 0)),
-      endTime: new Date(today.setHours(17, 0, 0)),
-    },
-    {
-      id: 4,
-      time: '6:00 PM',
-      title: 'Evening Review',
-      room: 'Meeting Room 1',
-      date: today.toLocaleDateString(),
-      startTime: new Date(today.setHours(18, 0, 0)),
-      endTime: new Date(today.setHours(19, 0, 0)),
-    },
-    {
-      id: 5,
-      time: '9:00 PM',
-      title: 'Final Call',
-      room: 'Meeting Room 7',
-      date: today.toLocaleDateString(),
-      startTime: new Date(today.setHours(21, 0, 0)),
-      endTime: new Date(today.setHours(22, 0, 0)),
-    },
-  ];
+        setMeetings(formattedMeetings);
+
+        const uniqueDates = Array.from(new Set(
+          formattedMeetings.map(meeting => meeting.date)
+            .filter(dateStr => dateStr !== 'Date unavailable')
+        )).map(dateStr => dayjs(dateStr).toDate()); // Convert Day.js date back to JS date
+
+        setEventDates(uniqueDates);
+      })
+      .catch((error) => console.error('Error fetching the data:', error));
+  }, []);
 
   const getMeetingStatus = (startTime, endTime) => {
-    const now = new Date();
-    if (now > endTime) return 'past';
-    if (now >= startTime && now <= endTime) return 'ongoing';
+    const now = dayjs(); // Use Day.js for the current time
+    if (now.isAfter(endTime)) return 'past';
+    if (now.isBetween(startTime, endTime)) return 'ongoing';
     return 'future';
   };
 
-  const renderMeeting = (meeting) => {
+  const filteredMeetings = meetings.filter(
+    meeting => dayjs(meeting.date).isSame(selectedDate, 'day') // Check if the date is the same
+  );
+
+  const renderMeeting = ({ item: meeting }) => {
     const status = getMeetingStatus(meeting.startTime, meeting.endTime);
     const isOngoing = status === 'ongoing';
     const isPast = status === 'past';
 
     return (
-      <View key={meeting.id} style={[styles.meetingContainer, isOngoing && styles.ongoingMeeting, isPast && styles.pastMeeting]}>
+      <View style={styles.meetingContainer}>
         <View style={styles.leftPart}>
-          <Text style={[styles.timeText, isPast && styles.pastText]}>{meeting.time}</Text>
-          <View style={[styles.circle, isOngoing ? styles.activeCircle : isPast ? styles.pastCircle : styles.futureCircle]} />
+          <Text style={[styles.timeText, isPast && styles.pastText, isOngoing && styles.boldText]}>
+            {meeting.time}
+          </Text>
+          <TouchableOpacity disabled={!isOngoing} onPress={() => console.log('Circle clicked!')}>
+            <View style={[styles.circle, isOngoing ? styles.activeCircle : isPast ? styles.pastCircle : styles.futureCircle]} />
+          </TouchableOpacity>
         </View>
         <View style={styles.divider} />
         <View style={styles.rightPart}>
-          <Text style={styles.meetingTitle}>{meeting.title}</Text>
-          <View style={styles.meetingDetail}>
-            <Icon name="location-outline" size={16} color="#000" />
-            <Text style={styles.detailText}>{meeting.room}</Text>
-          </View>
-          <View style={styles.meetingDetail}>
-            <Icon name="calendar-outline" size={16} color="#000" />
-            <Text style={styles.detailText}>{meeting.date}</Text>
-          </View>
-          <View style={styles.meetingDetail}>
-            <Icon name="time-outline" size={16} color="#000" />
-            <Text style={styles.detailText}>
-              {`${meeting.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${meeting.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-            </Text>
-          </View>
+          <Text style={[styles.meetingTitle, isPast && styles.pastText, isOngoing && styles.boldText]}>
+            {meeting.title}
+          </Text>
+          <MeetingDetail icon="location-outline" text={meeting.room} isPast={isPast} isOngoing={isOngoing} />
+          <MeetingDetail icon="calendar-outline" text={meeting.date} isPast={isPast} isOngoing={isOngoing} />
+          <MeetingDetail
+            icon="time-outline"
+            text={`${meeting.startTime.format('HH:mm')} - ${meeting.endTime.format('HH:mm')}`}
+            isPast={isPast} isOngoing={isOngoing}
+          />
         </View>
-        
       </View>
     );
   };
 
-  // Handle swipe to change the current week
-  const handleScrollEnd = (event) => {
-    const contentOffsetX = event.nativeEvent.contentOffset.x;
-    const index = Math.floor(contentOffsetX / width);
-    setCurrentWeek(index);
+  const renderDate = ({ item: date }) => (
+    <TouchableOpacity onPress={() => handleDateSelect(date)}>
+      <View style={[
+        styles.dateBox,
+        selectedDate.isSame(date, 'day') ? styles.selectedDateBox : null
+      ]}>
+        <Text style={[
+          styles.dayText,
+          selectedDate.isSame(date, 'day') ? styles.selectedDayText : null
+        ]}>
+          {date.toLocaleString('en-US', { weekday: 'short' })}
+        </Text>
+        <Text style={[
+          selectedDate.isSame(date, 'day') ? styles.selectedDate : styles.dateText
+        ]}>
+          {date.getDate()}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const MeetingDetail = ({ icon, text, isPast, isOngoing }) => (
+    <View style={styles.meetingDetail}>
+      <Icon name={icon} size={16} color="#000" />
+      <Text style={[styles.detailText, isPast && styles.pastText, isOngoing && styles.boldText]}>{text}</Text>
+    </View>
+  );
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(dayjs(date)); // Set selected date using Day.js
   };
 
   return (
     <View style={styles.container}>
-      {/* Date Calendar Section */}
-      <ScrollView
+      <FlatList
         horizontal
-        pagingEnabled
-        onMomentumScrollEnd={handleScrollEnd}
+        data={eventDates}
+        renderItem={renderDate}
+        keyExtractor={(date, index) => `${dayjs(date).valueOf()}-${index}`} // Use Day.js for unique key
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.dateScrollContainer}
         style={styles.horizontalScrollView}
-      >
-        {[...Array(52).keys()].map((_, index) => (
-          <View style={styles.dateContainer} key={index}>
-            {/* Display dates in 2 rows */}
-            <View style={styles.twoWeekContainer}>
-              {generateTwoWeeks(index).map((date, idx) => (
-                <View key={idx} style={styles.dateBox}>
-                  {/* Display day of the week only in the first row */}
-                  {idx < 7 && <Text style={styles.dayText}>{date.toLocaleString('en-US', { weekday: 'short' })}</Text>}
-                  <Text
-                    style={
-                      today.getDate() === date.getDate() && today.getMonth() === date.getMonth()
-                        ? styles.todayDate
-                        : styles.dateText
-                    }
-                  >
-                    {date.getDate()}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+      />
 
-      {/* Scrollable Meeting List Section */}
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.meetingListContainer}>
-        {meetings.map((meeting) => renderMeeting(meeting))}
-      </ScrollView>
+      <FlatList
+        data={filteredMeetings}
+        renderItem={renderMeeting}
+        keyExtractor={item => item.id.toString()}
+        showsVerticalScrollIndicator={false}
+        style={styles.meetingListContainer}
+        ListEmptyComponent={() => (
+          <Text style={styles.noMeetingsText}>No meetings for the selected date.</Text>
+        )}
+      />
 
       <Footer style={styles.footer} />
     </View>
-
-     
-    
   );
 };
 
-// Styles
+// ... styles remain exactly the same ...
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    flexDirection: 'column',
+    backgroundColor: '#f3f3f3',
+    paddingBottom: 20,
   },
   horizontalScrollView: {
-    flexGrow: 0, // Prevents it from growing more than its content
-    height: 'auto', // Adjusts height based on content
+    flexGrow: 0,
+    height: 'auto',
+    backgroundColor: '#e0e0e0',
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    marginHorizontal: 10,
   },
   dateScrollContainer: {
     paddingVertical: 10,
-    backgroundColor: '#db1d1d',
   },
-  dateContainer: {
-    width: width,
-    padding: 10,
-    backgroundColor: '#f4f4f4',
-    borderRadius: 10,
-  },
-  twoWeekContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-
-
   dateBox: {
-    width: '14%', // Adjust to fit 7 dates in one row
+    width: 80,
     alignItems: 'center',
-    marginBottom: 10,
+    paddingHorizontal: 5,
+  },
+  selectedDateBox: {
+    backgroundColor: '#cc0077',
+    borderRadius: 30,
+    paddingVertical: 10,
+    width: 50,
   },
   dayText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#7e7e7e',
+  },
+  selectedDayText: {
+    color: '#fff',
   },
   dateText: {
     fontSize: 18,
     color: '#333',
   },
-  todayDate: {
+  selectedDate: {
     fontSize: 18,
     color: '#fff',
-    backgroundColor: '#fd61e3',
-    borderRadius: 15,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
   },
   meetingListContainer: {
-    flex: 0.7, // Set height ratio for vertical scroll view
+    flex: 1,
+    paddingHorizontal: 15,
   },
   meetingContainer: {
     flexDirection: 'row',
-    paddingVertical: 20,
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
-  },
-  ongoingMeeting: {
-    backgroundColor: '#d7ffe0',
-  },
-  pastMeeting: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    marginBottom: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   leftPart: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 20,
   },
   circle: {
     width: 16,
@@ -242,44 +222,328 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   activeCircle: {
-    backgroundColor: '#34a853',
+    backgroundColor: '#cc0077',
   },
   pastCircle: {
-    backgroundColor: 'gray',
+    backgroundColor: '#ddd',
   },
   futureCircle: {
-    backgroundColor: '#ccc',
+    backgroundColor: '#0db07b',
   },
   timeText: {
     fontSize: 16,
-    color: '#333',
     marginBottom: 5,
+    textAlign: 'center',
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: '#cc0077',
   },
   pastText: {
-    color: 'gray',
+    color: '#aaa',
   },
   divider: {
-    width: 1,
-    backgroundColor: '#ccc',
-    marginVertical: 5,
+    width: 3,
+    backgroundColor: '#ddd',
+    marginHorizontal: 10,
+    marginLeft: '15%',
+    marginRight: '5%',
   },
   rightPart: {
     flex: 1,
+    justifyContent: 'center',
   },
   meetingTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
+    marginBottom: 10,
+    color: '#333',
   },
   meetingDetail: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 2,
+    marginBottom: 5,
   },
   detailText: {
-    marginLeft: 5,
-    color: '#555',
+    marginLeft: 8,
+    fontSize: 14,
+    color: '#666',
+  },
+  noMeetingsText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#999',
+  },
+  footer: {
+    marginTop: 10,
   },
 });
 
 export default CalendarView;
+
+
+
+// import React, { useState, useEffect } from 'react';
+// import { View, Text, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+// import Icon from 'react-native-vector-icons/Ionicons';
+// import Footer from '../Components/Footer';
+// import calendarData from '../Data/Calander.json'; // Adjust the path as necessary
+
+// const { width } = Dimensions.get('window');
+
+// const CalendarView = () => {
+//   const today = new Date();
+//   const [selectedDate, setSelectedDate] = useState(today);
+//   const [meetings, setMeetings] = useState([]);
+//   const [eventDates, setEventDates] = useState([]);
+
+//   useEffect(() => {
+//     // Instead of fetching from an API, use the imported JSON data
+//     const formattedMeetings = calendarData.result.map(meeting => ({
+//       id: parseInt(meeting.schedule_id),
+//       time: new Date(meeting.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+//       title: meeting.topic,
+//       room: meeting.location,
+//       date: new Date(meeting.event_date).toLocaleDateString(),
+//       startTime: new Date(`${meeting.event_date}T${meeting.start_time}`),
+//       endTime: new Date(`${meeting.event_date}T${meeting.end_time}`),
+//     }));
+
+//     setMeetings(formattedMeetings);
+
+//     const uniqueDates = Array.from(
+//       new Set(formattedMeetings.map(meeting => new Date(meeting.date).toLocaleDateString()))
+//     ).map(date => new Date(date));
+
+//     setEventDates(uniqueDates);
+//   }, []);
+
+//   const getMeetingStatus = (startTime, endTime) => {
+//     const now = new Date();
+//     if (now > endTime) return 'past';
+//     if (now >= startTime && now <= endTime) return 'ongoing';
+//     return 'future';
+//   };
+
+//   const filteredMeetings = meetings.filter(
+//     meeting => new Date(meeting.date).toLocaleDateString() === selectedDate.toLocaleDateString()
+//   );
+
+//   const renderMeeting = (meeting) => {
+//     const status = getMeetingStatus(meeting.startTime, meeting.endTime);
+//     const isOngoing = status === 'ongoing';
+//     const isPast = status === 'past';
+
+//     return (
+//       <View key={meeting.id} style={styles.meetingContainer}>
+//         <View style={styles.leftPart}>
+//           <Text style={[styles.timeText, isPast && styles.pastText, isOngoing && styles.boldText]}>
+//             {meeting.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+//           </Text>
+//           <TouchableOpacity disabled={!isOngoing} onPress={() => console.log('Circle clicked!')}>
+//             <View style={[styles.circle, isOngoing ? styles.activeCircle : isPast ? styles.pastCircle : styles.futureCircle]} />
+//           </TouchableOpacity>
+//         </View>
+//         <View style={styles.divider} />
+//         <View style={styles.rightPart}>
+//           <Text style={[styles.meetingTitle, isPast && styles.pastText, isOngoing && styles.boldText]}>
+//             {meeting.title}
+//           </Text>
+//           <MeetingDetail icon="location-outline" text={meeting.room} isPast={isPast} isOngoing={isOngoing} />
+//           <MeetingDetail icon="calendar-outline" text={meeting.date} isPast={isPast} isOngoing={isOngoing} />
+//           <MeetingDetail
+//             icon="time-outline"
+//             text={`${meeting.startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${meeting.endTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+//             isPast={isPast} isOngoing={isOngoing}
+//           />
+//         </View>
+//       </View>
+//     );
+//   };
+
+//   const MeetingDetail = ({ icon, text, isPast, isOngoing }) => (
+//     <View style={styles.meetingDetail}>
+//       <Icon name={icon} size={16} color="#000" />
+//       <Text style={[styles.detailText, isPast && styles.pastText, isOngoing && styles.boldText]}>{text}</Text>
+//     </View>
+//   );
+
+//   const handleDateSelect = (date) => {
+//     setSelectedDate(date);
+//   };
+
+//   return (
+//     <View style={styles.container}>
+//       <ScrollView
+//         horizontal
+//         pagingEnabled
+//         showsHorizontalScrollIndicator={false}
+//         contentContainerStyle={styles.dateScrollContainer}
+//         style={styles.horizontalScrollView}
+//       >
+//         {eventDates.map((date, idx) => (
+//           <TouchableOpacity key={idx} onPress={() => handleDateSelect(date)}>
+//             <View style={[
+//               styles.dateBox,
+//               selectedDate.getDate() === date.getDate() && selectedDate.getMonth() === date.getMonth() ? styles.selectedDateBox : null
+//             ]}>
+//               <Text style={[
+//                 styles.dayText,
+//                 selectedDate.getDate() === date.getDate() ? styles.selectedDayText : null
+//               ]}>
+//                 {date.toLocaleString('en-US', { weekday: 'short' })}
+//               </Text>
+//               <Text style={[
+//                 selectedDate.getDate() === date.getDate() && selectedDate.getMonth() === date.getMonth() ? styles.selectedDate : styles.dateText
+//               ]}>
+//                 {date.getDate()}
+//               </Text>
+//             </View>
+//           </TouchableOpacity>
+//         ))}
+//       </ScrollView>
+
+//       <ScrollView showsVerticalScrollIndicator={false} style={styles.meetingListContainer}>
+//         {filteredMeetings.length > 0 ? (
+//           filteredMeetings.map(renderMeeting)
+//         ) : (
+//           <Text style={styles.noMeetingsText}>No meetings for the selected date.</Text>
+//         )}
+//       </ScrollView>
+
+//       <Footer style={styles.footer} />
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: '#f3f3f3',
+//     paddingBottom: 20,
+//   },
+//   horizontalScrollView: {
+//     flexGrow: 0,
+//     height: 'auto',
+//     backgroundColor: '#e0e0e0',
+//     paddingVertical: 15,
+//     borderBottomWidth: 1,
+//     borderColor: '#ccc',
+//     borderRadius: 10,
+//     marginHorizontal: 10,
+//   },
+//   dateScrollContainer: {
+//     paddingVertical: 10,
+//   },
+//   dateBox: {
+//     width: 80,
+//     alignItems: 'center',
+//     paddingHorizontal: 5,
+//   },
+//   selectedDateBox: {
+//     backgroundColor: '#cc0077',
+//     borderRadius: 30,
+//     paddingVertical: 10,
+//     width: 50,
+//   },
+//   dayText: {
+//     fontSize: 14,
+//     fontWeight: 'bold',
+//     color: '#7e7e7e',
+//   },
+//   selectedDayText: {
+//     color: '#fff',
+//   },
+//   dateText: {
+//     fontSize: 18,
+//     color: '#333',
+//   },
+//   selectedDate: {
+//     fontSize: 18,
+//     color: '#fff',
+//   },
+//   meetingListContainer: {
+//     flex: 1,
+//     paddingHorizontal: 15,
+//   },
+//   meetingContainer: {
+//     flexDirection: 'row',
+//     backgroundColor: '#fff',
+//     borderRadius: 10,
+//     marginBottom: 15,
+//     padding: 15,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 3 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 5,
+//     elevation: 3,
+//   },
+//   leftPart: {
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     marginRight: 20,
+//   },
+//   circle: {
+//     width: 16,
+//     height: 16,
+//     borderRadius: 8,
+//   },
+//   activeCircle: {
+//     backgroundColor: '#cc0077',
+//   },
+//   pastCircle: {
+//     backgroundColor: '#ddd',
+//   },
+//   futureCircle: {
+//     backgroundColor: '#0db07b',
+//   },
+//   timeText: {
+//     fontSize: 16,
+//     marginBottom: 5,
+//     textAlign: 'center',
+//   },
+//   boldText: {
+//     fontWeight: 'bold',
+//     color: '#cc0077',
+//   },
+//   pastText: {
+//     color: '#aaa',
+//   },
+//   divider: {
+//     width: 3,
+//     backgroundColor: '#ddd',
+//     marginHorizontal: 10,
+//     marginLeft: '15%',
+//     marginRight: '5%',
+//     color: 'black',
+//   },
+//   rightPart: {
+//     flex: 1,
+//     justifyContent: 'center',
+//   },
+//   meetingTitle: {
+//     fontSize: 16,
+//     marginBottom: 10,
+//     color: '#333',
+//   },
+//   meetingDetail: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: 5,
+//   },
+//   detailText: {
+//     marginLeft: 8,
+//     fontSize: 14,
+//     color: '#333',
+//   },
+//   noMeetingsText: {
+//     fontSize: 16,
+//     textAlign: 'center',
+//     marginVertical: 20,
+//     color: '#999',
+//   },
+//   footer: {
+//     marginTop: 20,
+//   },
+// });
+
+// export default CalendarView;
