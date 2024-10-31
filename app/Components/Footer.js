@@ -3,13 +3,15 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { globalStyles } from '../styles/globalStyles';
+import { useEventId } from '../context/EventIdContext';
 
 export default function Footer() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Feed');
+  const { eventId } = useEventId();
 
-  const handlePress = (screenName) => {
-    navigation.navigate(screenName);
+  const handlePress = (screenName, params = {}) => {
+    navigation.navigate(screenName, params);
   };
 
   // Update the activeTab when the screen is focused
@@ -22,7 +24,7 @@ export default function Footer() {
 
   return (
     <View style={[globalStyles.footer, styles.footerContainer]}>
-      <TouchableOpacity onPress={() => handlePress('Feed')} style={styles.iconWrapper}>
+      <TouchableOpacity onPress={() => handlePress('Feed', { eventId })} style={styles.iconWrapper}>
         <View style={[styles.circle, activeTab === 'Feed' && styles.activeCircle]}>
           <Icon name="home-outline" size={25} color={activeTab === 'Feed' ? '#fff' : '#000'} />
         </View>

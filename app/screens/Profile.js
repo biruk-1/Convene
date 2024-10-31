@@ -1,103 +1,120 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons'; // Import Material Icons for the icons
+import React, { useContext } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import Footer from '../Components/Footer';
-// import styles from '../styles/styles';
+import { ThemeContext } from '../context/ThemeContext';
+import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
 
 const Profile = () => {
   const userName = "John Doe"; // Replace with dynamic user data
+  const theme = useContext(ThemeContext);
+  const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   return (
-    <View>
-    <View style={styles.container}>
-      {/* Profile Section */}
-      <View style={styles.profileSection}>
-        <View style={styles.profileImageContainer}>
-          <Image 
-            source={{ uri: 'https://via.placeholder.com/150' }} // Replace with dynamic user image
-            style={styles.profileImage} 
-          />
-          <TouchableOpacity style={styles.editIcon}>
-            <MaterialIcons name="edit" size={24} color="white" />
-          </TouchableOpacity>
+    <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={[styles.profileSection, { backgroundColor: currentTheme.secondary }]}>
+          <View style={styles.profileImageContainer}>
+            <Image 
+              source={{ uri: 'https://via.placeholder.com/150' }} // Replace with dynamic user image
+              style={styles.profileImage} 
+            />
+            <TouchableOpacity style={[styles.editIcon, { backgroundColor: currentTheme.primary }]}>
+              <MaterialIcons name="edit" size={20} color={currentTheme.text} />
+            </TouchableOpacity>
+          </View>
+          <Text style={[styles.userName, { color: currentTheme.text }]}>{userName}</Text>
         </View>
-        <Text style={styles.userName}>{userName}</Text>
-      </View>
 
-      {/* Menu Options */}
-      <View style={styles.menuContainer}>
-        <MenuItem icon="lock" title="Change Password" />
-        <MenuItem icon="notifications" title="Notification Settings" />
-        <MenuItem icon="report-problem" title="Report Problem" />
-        <MenuItem icon="logout" title="Logout" />
-      </View>
+        <View style={[styles.menuContainer, { backgroundColor: currentTheme.secondary }]}>
+          <MenuItem icon="lock" title="Change Password" theme={currentTheme} />
+          <MenuItem icon="notifications" title="Notification Settings" theme={currentTheme} />
+          <MenuItem icon="report-problem" title="Report Problem" theme={currentTheme} />
+          <MenuItem icon="logout" title="Logout" theme={currentTheme} />
+        </View>
+      </ScrollView>
       
-    </View>
-    <Footer style={styles.footer} />
+      <Footer style={styles.footer} />
     </View>
   );
 };
 
-// MenuItem Component for displaying menu options
-const MenuItem = ({ icon, title }) => {
+const MenuItem = ({ icon, title, theme }) => {
   return (
-    <TouchableOpacity style={styles.menuItem}>
-      <MaterialIcons name={icon} size={24} color="#5E5E5E" />
-      <Text style={styles.menuTitle}>{title}</Text>
+    <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.primary }]}>
+      <MaterialIcons name={icon} size={24} color={theme.primary} />
+      <Text style={[styles.menuTitle, { color: theme.text }]}>{title}</Text>
     </TouchableOpacity>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContainer: {
     padding: 20,
-    alignItems: 'center',
-    marginBottom:'30%',
+    paddingBottom: 80, // Add padding to avoid overlap with footer
   },
   profileSection: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 30,
+    paddingVertical: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   profileImageContainer: {
     position: 'relative',
     marginBottom: 10,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
   },
   editIcon: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    backgroundColor: '#FF6347', // Tomato color for the edit icon background
-    borderRadius: 50,
+    borderRadius: 15,
     padding: 5,
   },
   userName: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '600',
   },
   menuContainer: {
-    width: '100%',
+    marginTop: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
   },
   menuTitle: {
-    marginLeft: 10,
+    marginLeft: 15,
     fontSize: 16,
-    color: '#5E5E5E',
   },
-  
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
 });
 
 export default Profile;

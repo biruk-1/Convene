@@ -1,6 +1,7 @@
-// Feedback.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { ThemeContext } from '../context/ThemeContext';
+import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
 
 const questions = [
   "How do you rate the annual developers conference?",
@@ -16,6 +17,9 @@ const Feedback = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
 
+  const theme = useContext(ThemeContext);
+  const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
+
   const handleNext = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -29,20 +33,21 @@ const Feedback = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
       <ScrollView>
-        <Text style={styles.question}>{questions[currentQuestion]}</Text>
+        <Text style={[styles.question, { color: currentTheme.text }]}>{questions[currentQuestion]}</Text>
         <View style={styles.optionsContainer}>
           {options.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={[
                 styles.option,
-                selectedOption === index && styles.selectedOption,
+                { borderColor: currentTheme.primary },
+                selectedOption === index && { backgroundColor: currentTheme.primary },
               ]}
               onPress={() => setSelectedOption(index)}
             >
-              <Text style={styles.optionText}>{option}</Text>
+              <Text style={[styles.optionText, { color: currentTheme.text }]}>{option}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -52,15 +57,25 @@ const Feedback = () => {
               key={index}
               style={[
                 styles.dot,
-                currentQuestion === index && styles.activeDot,
+                { backgroundColor: currentTheme.secondary },
+                currentQuestion === index && { backgroundColor: currentTheme.primary },
               ]}
             />
           ))}
         </View>
         {currentQuestion < questions.length - 1 ? (
-          <Button style = {styles.button} title="Continue" onPress={handleNext} disabled={selectedOption === null} />
+          <Button
+            title="Continue"
+            onPress={handleNext}
+            disabled={selectedOption === null}
+            color={currentTheme.primary} // Use theme color for button
+          />
         ) : (
-          <Button  style = {styles.button} title="Submit Feedback" onPress={handleSubmit} />
+          <Button
+            title="Submit Feedback"
+            onPress={handleSubmit}
+            color={currentTheme.primary} // Use theme color for button
+          />
         )}
       </ScrollView>
     </View>
@@ -72,9 +87,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  button :{
-    backgroundColor:'#cc0077',
-  },
   question: {
     fontSize: 18,
     marginBottom: 20,
@@ -85,12 +97,8 @@ const styles = StyleSheet.create({
   option: {
     padding: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 5,
     marginVertical: 5,
-  },
-  selectedOption: {
-    backgroundColor: '#cc0077',
   },
   optionText: {
     textAlign: 'center',
@@ -104,11 +112,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#ddd',
     margin: 5,
-  },
-  activeDot: {
-    backgroundColor: '#cc0077',
   },
 });
 

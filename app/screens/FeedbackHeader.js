@@ -1,12 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { ThemeContext } from '../context/ThemeContext';
+import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
 
 const FeedbackHeader = ({ onPress }) => {
   const navigation = useNavigation();
+  const theme = useContext(ThemeContext);
+  const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   return (
-    <View style={styles.headerContainer}>
+    <View style={[styles.headerContainer, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
       {/* Profile Section */}
       <View style={styles.profileContainer}>
         <Image 
@@ -14,23 +18,23 @@ const FeedbackHeader = ({ onPress }) => {
           style={styles.profileImage} 
         />
         <View style={styles.profileTextContainer}>
-          <Text style={styles.profileName}>Event Organizer</Text>
-          <Text style={styles.noticeText}>Notice from the organizer</Text>
+          <Text style={[styles.profileName, { color: currentTheme.text }]}>Event Organizer</Text>
+          <Text style={[styles.noticeText, { color: currentTheme.text }]}>Notice from the organizer</Text>
         </View>
       </View>
 
       {/* Feedback Message */}
-      <Text style={styles.feedbackText}>
+      <Text style={[styles.feedbackText, { color: currentTheme.text }]}>
         We would like to hear your feedback about the Annual Developers Conference.
       </Text>
 
       {/* Feedback Button Container */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity 
-          style={styles.button} 
+          style={[styles.button, { backgroundColor: currentTheme.primary }]} 
           onPress={() => navigation.navigate('Feedback')}
         >
-          <Text style={styles.buttonText}>Give Feedback</Text>
+          <Text style={[styles.buttonText, { color: currentTheme.text }]}>Give Feedback</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -40,11 +44,9 @@ const FeedbackHeader = ({ onPress }) => {
 const styles = StyleSheet.create({
   headerContainer: {
     padding: 15,
-    backgroundColor: '#ffffff', // Changed to white for a clean look
     alignItems: 'flex-start', // Aligns content to the start
     borderRadius: 10, // Rounded corners for visual appeal
     borderWidth: 1,
-    borderColor: '#e0e0e0', // Slightly darker border for contrast
     shadowColor: '#000', // Adds a shadow for depth
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -69,16 +71,13 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 20, // Increased font size for prominence
     fontWeight: 'bold',
-    color: '#333',
   },
   noticeText: {
     fontSize: 12, // Reduced font size for notice text
-    color: '#777', // Lighter color for differentiation
   },
   feedbackText: {
     fontSize: 14, // Decreased font size for better hierarchy
     textAlign: 'left', // Align text to the left
-    color: '#444',
     marginBottom: 15, // Space between text and button
     paddingHorizontal: 5, // Added padding for text
   },
@@ -87,16 +86,13 @@ const styles = StyleSheet.create({
     width: '100%', // Full width to center the button
   },
   button: {
-    backgroundColor: '#cc0077', // Retained pink color for consistency
     paddingVertical: 10,
     paddingHorizontal: 60, // Adjusted padding for button
     borderRadius: 5, // Rounded corners
     elevation: 2, // Shadow for button
   },
   buttonText: {
-    color: '#ffffff',
     fontSize: 16,
-    // fontWeight: 'bold',
   },
 });
 

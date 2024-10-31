@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../Components/Footer';
+import { ThemeContext } from '../context/ThemeContext';
+import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
 
 function QuestionsPage() {
   const [activeTab, setActiveTab] = useState('Questions');
@@ -10,6 +12,9 @@ function QuestionsPage() {
   const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const userName = 'Abebe';
   const navigation = useNavigation();
+
+  const theme = useContext(ThemeContext);
+  const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   // Fetch unanswered questions when component mounts
   useEffect(() => {
@@ -41,28 +46,28 @@ function QuestionsPage() {
   };
 
   return (
-    <View style={styles.pageContainer}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>
+    <View style={[styles.pageContainer, { backgroundColor: currentTheme.background }]}>
+      <View style={[styles.headerContainer, { backgroundColor: currentTheme.primary }]}>
+        <Text style={[styles.headerText, { color: currentTheme.text }]}>
           {activeTab === 'Questions' ? 'Questions' : 'Answers'}
         </Text>
       </View>
 
-      <View style={styles.contentContainer}>
+      <View style={[styles.contentContainer, { backgroundColor: currentTheme.secondary }]}>
         <View style={styles.tabsContainer}>
           <TouchableOpacity
-            style={[styles.tab, activeTab === 'Questions' && styles.activeTab]}
+            style={[styles.tab, activeTab === 'Questions' && { backgroundColor: currentTheme.primary }]}
             onPress={() => handleTabChange('Questions')}
           >
-            <Text style={[styles.tabText, activeTab === 'Questions' && styles.activeTabText]}>
+            <Text style={[styles.tabText, activeTab === 'Questions' && { color: currentTheme.text }]}>
               Questions ({unansweredQuestions.length})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tab, activeTab === 'Answers' && styles.activeTab]}
+            style={[styles.tab, activeTab === 'Answers' && { backgroundColor: currentTheme.primary }]}
             onPress={() => handleTabChange('Answers')}
           >
-            <Text style={[styles.tabText, activeTab === 'Answers' && styles.activeTabText]}>
+            <Text style={[styles.tabText, activeTab === 'Answers' && { color: currentTheme.text }]}>
               Answers ({answeredQuestions.length})
             </Text>
           </TouchableOpacity>
@@ -71,35 +76,35 @@ function QuestionsPage() {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {activeTab === 'Questions' ? (
             unansweredQuestions.map((item) => (
-              <View key={item.question_id} style={styles.questionContainer}>
-                <Text style={styles.tagText}>#{item.position}</Text>
-                <Text style={styles.questionText}>{item.question}</Text>
+              <View key={item.question_id} style={[styles.questionContainer, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
+                <Text style={[styles.tagText, { color: currentTheme.primary }]}>#{item.position}</Text>
+                <Text style={[styles.questionText, { color: currentTheme.text }]}>{item.question}</Text>
                 <View style={styles.userContainer}>
                   <Image source={{ uri: item.pro_pic }} style={styles.userAvatar} />
-                  <Text style={styles.userName}>{`${item.first_name} ${item.last_name}`}</Text>
+                  <Text style={[styles.userName, { color: currentTheme.text }]}>{`${item.first_name} ${item.last_name}`}</Text>
                   <View style={styles.voteContainer}>
-                    <Icon name="heart-outline" size={20} color="#fd61e3" />
-                    <Text style={styles.voteCount}>{item.votes || 0}</Text>
+                    <Icon name="heart-outline" size={20} color={currentTheme.primary} />
+                    <Text style={[styles.voteCount, { color: currentTheme.primary }]}>{item.votes || 0}</Text>
                   </View>
                 </View>
               </View>
             ))
           ) : (
             answeredQuestions.map((item) => (
-              <View key={item.question_id} style={styles.answerContainer}>
-                <Text style={styles.tagText}>#{item.position}</Text>
-                <Text style={styles.answerText}>{item.question}</Text>
-                <Text style={styles.answerUser}>Answered by {item.first_name} {item.last_name}</Text>
+              <View key={item.question_id} style={[styles.answerContainer, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
+                <Text style={[styles.tagText, { color: currentTheme.primary }]}>#{item.position}</Text>
+                <Text style={[styles.answerText, { color: currentTheme.text }]}>{item.question}</Text>
+                <Text style={[styles.answerUser, { color: currentTheme.text }]}>Answered by {item.first_name} {item.last_name}</Text>
               </View>
             ))
           )}
 
           {activeTab === 'Questions' && (
             <TouchableOpacity
-              style={styles.askButton}
+              style={[styles.askButton, { backgroundColor: currentTheme.primary }]}
               onPress={() => navigation.navigate('AskQuestion', { userName })}
             >
-              <Text style={styles.askButtonText}>Ask a Question</Text>
+              <Text style={[styles.askButtonText, { color: currentTheme.text }]}>Ask a Question</Text>
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -112,10 +117,8 @@ function QuestionsPage() {
 const styles = StyleSheet.create({
   pageContainer: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
   },
   headerContainer: {
-    backgroundColor: '#cc0077',
     paddingVertical: 30,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -123,13 +126,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   headerText: {
-    color: '#fff',
     fontSize: 32,
     fontWeight: 'bold',
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: '#fff',
     borderRadius: 30,
     padding: 20,
     marginTop: -20,
@@ -144,7 +145,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     paddingVertical: 10,
     marginBottom: 20,
-    backgroundColor: '#f5f5f5',
     borderRadius: 10,
   },
   tab: {
@@ -155,17 +155,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderWidth: 1,
   },
-  activeTab: {
-    backgroundColor: '#cc0077',
-    borderColor: '#cc0077',
-  },
   tabText: {
     fontSize: 16,
-    color: '#333',
-  },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   scrollContainer: {
     paddingBottom: 20,
@@ -174,15 +165,14 @@ const styles = StyleSheet.create({
   questionContainer: {
     marginBottom: 20,
     padding: 20,
-    backgroundColor: '#f9f9f9',
     borderRadius: 15,
+    borderWidth: 2, // Add border width
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   tagText: {
-    color: '#3399ff',
     fontWeight: 'bold',
     marginBottom: 5,
   },
@@ -203,7 +193,6 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 16,
-    color: '#333',
     marginRight: 20,
   },
   voteContainer: {
@@ -213,10 +202,12 @@ const styles = StyleSheet.create({
   voteCount: {
     marginLeft: 5,
     fontSize: 14,
-    color: '#cc0077',
   },
   answerContainer: {
     marginBottom: 20,
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 2, // Add border width
   },
   answerText: {
     fontSize: 16,
@@ -225,17 +216,14 @@ const styles = StyleSheet.create({
   },
   answerUser: {
     fontSize: 14,
-    color: '#999',
   },
   askButton: {
     marginTop: 20,
     paddingVertical: 15,
-    backgroundColor: '#cc0077',
     alignItems: 'center',
     borderRadius: 10,
   },
   askButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '500',
   },
@@ -245,251 +233,3 @@ const styles = StyleSheet.create({
 });
 
 export default QuestionsPage;
-
-
-
-
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
-// import Icon from 'react-native-vector-icons/Ionicons';
-// import { useNavigation } from '@react-navigation/native';
-// import Footer from '../Components/Footer';
-// import questionsData from '../Data/quastions.json'; // Importing local JSON data
-
-// function QuestionsPage() {
-//   const [activeTab, setActiveTab] = useState('Questions');
-//   const [unansweredQuestions, setUnansweredQuestions] = useState([]);
-//   const [answeredQuestions, setAnsweredQuestions] = useState([]);
-//   const userName = 'Abebe';
-//   const navigation = useNavigation();
-
-//   // Use local data for unanswered questions
-//   useEffect(() => {
-//     // Simulate fetching unanswered questions from local JSON
-//     setUnansweredQuestions(questionsData.unanswered || []);
-//   }, []);
-
-//   // Simulate fetching answered questions when switching to "Answers" tab
-//   useEffect(() => {
-//     if (activeTab === 'Answers') {
-//       setAnsweredQuestions(questionsData.answered || []);
-//     }
-//   }, [activeTab]);
-
-//   const handleTabChange = (tab) => {
-//     setActiveTab(tab);
-//   };
-
-//   return (
-//     <View style={styles.pageContainer}>
-//       <View style={styles.headerContainer}>
-//         <Text style={styles.headerText}>
-//           {activeTab === 'Questions' ? 'Questions' : 'Answers'}
-//         </Text>
-//       </View>
-
-//       <View style={styles.contentContainer}>
-//         <View style={styles.tabsContainer}>
-//           <TouchableOpacity
-//             style={[styles.tab, activeTab === 'Questions' && styles.activeTab]}
-//             onPress={() => handleTabChange('Questions')}
-//           >
-//             <Text style={[styles.tabText, activeTab === 'Questions' && styles.activeTabText]}>
-//               Questions ({unansweredQuestions.length})
-//             </Text>
-//           </TouchableOpacity>
-//           <TouchableOpacity
-//             style={[styles.tab, activeTab === 'Answers' && styles.activeTab]}
-//             onPress={() => handleTabChange('Answers')}
-//           >
-//             <Text style={[styles.tabText, activeTab === 'Answers' && styles.activeTabText]}>
-//               Answers ({answeredQuestions.length})
-//             </Text>
-//           </TouchableOpacity>
-//         </View>
-
-//         <ScrollView contentContainerStyle={styles.scrollContainer}>
-//           {activeTab === 'Questions' ? (
-//             unansweredQuestions.map((item) => (
-//               <View key={item.question_id} style={styles.questionContainer}>
-//                 <Text style={styles.tagText}>#{item.position}</Text>
-//                 <Text style={styles.questionText}>{item.question}</Text>
-//                 <View style={styles.userContainer}>
-//                   <Image source={{ uri: item.pro_pic }} style={styles.userAvatar} />
-//                   <Text style={styles.userName}>{`${item.first_name} ${item.last_name}`}</Text>
-//                   <View style={styles.voteContainer}>
-//                     <Icon name="heart-outline" size={20} color="#fd61e3" />
-//                     <Text style={styles.voteCount}>{item.votes || 0}</Text>
-//                   </View>
-//                 </View>
-//               </View>
-//             ))
-//           ) : (
-//             answeredQuestions.map((item) => (
-//               <View key={item.question_id} style={styles.answerContainer}>
-//                 <Text style={styles.tagText}>#{item.position}</Text>
-//                 <Text style={styles.answerText}>{item.question}</Text>
-//                 <Text style={styles.answerUser}>Answered by {item.first_name} {item.last_name}</Text>
-//               </View>
-//             ))
-//           )}
-
-//           {activeTab === 'Questions' && (
-//             <TouchableOpacity
-//               style={styles.askButton}
-//               onPress={() => navigation.navigate('AskQuestion', { userName })}
-//             >
-//               <Text style={styles.askButtonText}>Ask a Question</Text>
-//             </TouchableOpacity>
-//           )}
-//         </ScrollView>
-//       </View>
-//       <Footer style={styles.footer} />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   pageContainer: {
-//     flex: 1,
-//     backgroundColor: '#f0f0f0',
-//   },
-//   headerContainer: {
-//     backgroundColor: '#cc0077',
-//     paddingVertical: 30,
-//     paddingHorizontal: 20,
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//     width: '100%',
-//   },
-//   headerText: {
-//     color: '#fff',
-//     fontSize: 32,
-//     fontWeight: 'bold',
-//     fontFamily: 'Poppins-Bold',
-//   },
-//   contentContainer: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     borderRadius: 30,
-//     padding: 20,
-//     marginTop: -20,
-//     elevation: 4,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 5,
-//   },
-//   tabsContainer: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-around',
-//     paddingVertical: 10,
-//     marginBottom: 20,
-//     backgroundColor: '#f5f5f5',
-//     borderRadius: 10,
-//   },
-//   tab: {
-//     flex: 1,
-//     alignItems: 'center',
-//     paddingVertical: 10,
-//     borderRadius: 20,
-//     borderColor: '#ccc',
-//     borderWidth: 1,
-//   },
-//   activeTab: {
-//     backgroundColor: '#cc0077',
-//     borderColor: '#cc0077',
-//   },
-//   tabText: {
-//     fontSize: 16,
-//     color: '#333',
-//     fontFamily: 'Roboto-Regular',
-//   },
-//   activeTabText: {
-//     color: '#fff',
-//     fontWeight: 'bold',
-//   },
-//   scrollContainer: {
-//     paddingBottom: 20,
-//     height: 400,
-//   },
-//   questionContainer: {
-//     marginBottom: 20,
-//     padding: 20,
-//     backgroundColor: '#f9f9f9',
-//     borderRadius: 15,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 1 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 2,
-//   },
-//   tagText: {
-//     color: '#3399ff',
-//     fontWeight: 'bold',
-//     marginBottom: 5,
-//     fontFamily: 'Poppins-SemiBold',
-//   },
-//   questionText: {
-//     fontSize: 18,
-//     marginBottom: 10,
-//     fontFamily: 'Roboto-Regular',
-//     textAlign: 'left',
-//   },
-//   userContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   userAvatar: {
-//     width: 40,
-//     height: 40,
-//     borderRadius: 20,
-//     marginRight: 10,
-//   },
-//   userName: {
-//     fontSize: 16,
-//     color: '#333',
-//     marginRight: 20,
-//     fontFamily: 'Roboto-Regular',
-//   },
-//   voteContainer: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//   },
-//   voteCount: {
-//     marginLeft: 5,
-//     fontSize: 14,
-//     color: '#cc0077',
-//   },
-//   answerContainer: {
-//     marginBottom: 20,
-//   },
-//   answerText: {
-//     fontSize: 16,
-//     marginBottom: 5,
-//     fontFamily: 'Roboto-Regular',
-//     textAlign: 'left',
-//   },
-//   answerUser: {
-//     fontSize: 14,
-//     color: '#999',
-//     fontFamily: 'Roboto-Light',
-//   },
-//   askButton: {
-//     marginTop: 20,
-//     paddingVertical: 15,
-//     backgroundColor: '#cc0077',
-//     alignItems: 'center',
-//     borderRadius: 10,
-//   },
-//   askButtonText: {
-//     color: '#fff',
-//     fontSize: 16,
-//     fontFamily: 'Poppins-Medium',
-//   },
-//   footer: {
-//     marginTop: 10,
-//   },
-// });
-
-// export default QuestionsPage;
-

@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Footer from '../Components/Footer';
+import { ThemeContext } from '../context/ThemeContext';
+import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
 
 export default function AskQuestion({ route }) {
   const navigation = useNavigation();
@@ -11,12 +13,16 @@ export default function AskQuestion({ route }) {
   // State for tracking selected ask option
   const [selectedOption, setSelectedOption] = useState(null);
 
+  const theme = useContext(ThemeContext);
+  const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
       {/* Input box for question */}
       <TextInput
         placeholder="State your question here..."
-        style={styles.input}
+        placeholderTextColor="#b0b0b0"
+        style={[styles.input, { backgroundColor: currentTheme.secondary, color: currentTheme.text }]}
         multiline
       />
 
@@ -25,19 +31,21 @@ export default function AskQuestion({ route }) {
         <TouchableOpacity
           style={[
             styles.askOptionBox,
-            selectedOption === 'user' && styles.selectedOptionBox
+            { borderColor: currentTheme.primary },
+            selectedOption === 'user' && { backgroundColor: currentTheme.primary },
           ]}
           onPress={() => setSelectedOption('user')}
         >
           <Icon
             name="person-circle-outline"
             size={30}
-            color={selectedOption === 'user' ? '#cc0077' : '#000'}
+            color={selectedOption === 'user' ? currentTheme.text : currentTheme.primary}
           />
           <Text
             style={[
               styles.askOptionText,
-              selectedOption === 'user' && styles.selectedOptionText
+              { color: currentTheme.text },
+              selectedOption === 'user' && { color: currentTheme.text, fontWeight: 'bold' },
             ]}
           >
             Ask as {userName}
@@ -47,19 +55,21 @@ export default function AskQuestion({ route }) {
         <TouchableOpacity
           style={[
             styles.askOptionBox,
-            selectedOption === 'anonymous' && styles.selectedOptionBox
+            { borderColor: currentTheme.primary },
+            selectedOption === 'anonymous' && { backgroundColor: currentTheme.primary },
           ]}
           onPress={() => setSelectedOption('anonymous')}
         >
           <Icon
             name="person-outline"
             size={30}
-            color={selectedOption === 'anonymous' ? '#cc0077' : '#000'}
+            color={selectedOption === 'anonymous' ? currentTheme.text : currentTheme.primary}
           />
           <Text
             style={[
               styles.askOptionText,
-              selectedOption === 'anonymous' && styles.selectedOptionText
+              { color: currentTheme.text },
+              selectedOption === 'anonymous' && { color: currentTheme.text, fontWeight: 'bold' },
             ]}
           >
             Ask Anonymously
@@ -68,8 +78,8 @@ export default function AskQuestion({ route }) {
       </View>
 
       {/* Back button */}
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.cancelButton}>
-        <Text style={styles.cancelButtonText}>Cancel</Text>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.cancelButton, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
+        <Text style={[styles.cancelButtonText, { color: currentTheme.primary }]}>Cancel</Text>
       </TouchableOpacity>
     </View>
   );
@@ -79,17 +89,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f7f8fa',
   },
   input: {
     height: '50%',
-    backgroundColor: '#eaeaea',
     padding: 15,
     fontSize: 16,
     marginBottom: 20,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
   },
   askOptionsContainer: {
     flexDirection: 'row',
@@ -98,12 +105,10 @@ const styles = StyleSheet.create({
   },
   askOptionBox: {
     flex: 1,
-    backgroundColor: '#fff',
     paddingVertical: 20,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
     borderRadius: 8,
     marginHorizontal: 5,
     shadowColor: '#000',
@@ -114,16 +119,7 @@ const styles = StyleSheet.create({
   },
   askOptionText: {
     marginTop: 10,
-    color: '#333',
     fontSize: 16,
-  },
-  selectedOptionBox: {
-    borderColor: '#cc0077',
-    backgroundColor: '#fce4f7',
-  },
-  selectedOptionText: {
-    color: '#cc0077',
-    fontWeight: 'bold',
   },
   cancelButton: {
     marginTop: 30,
@@ -131,12 +127,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignSelf: 'center',
     borderRadius: 20,
-    backgroundColor: '#f8f0fa',
     borderWidth: 1,
-    borderColor: '#cc0077',
   },
   cancelButtonText: {
-    color: '#cc0077',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
