@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../Components/Footer';
 import { ThemeContext } from '../context/ThemeContext';
-import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
+import { lightTheme, darkTheme } from '../context/themes';
 
 function QuestionsPage() {
   const [activeTab, setActiveTab] = useState('Questions');
@@ -18,13 +25,19 @@ function QuestionsPage() {
 
   // Fetch unanswered questions when component mounts
   useEffect(() => {
-    fetchQuestions('https://zelesegna.com/convene/app/get_questions.php?event=1&status=0', setUnansweredQuestions);
+    fetchQuestions(
+      'https://zelesegna.com/convene/app/get_questions.php?event=1&status=0',
+      setUnansweredQuestions
+    );
   }, []);
 
   // Fetch answered questions when switching to "Answers" tab
   useEffect(() => {
     if (activeTab === 'Answers') {
-      fetchQuestions('https://zelesegna.com/convene/app/get_questions.php?event=1&status=1', setAnsweredQuestions);
+      fetchQuestions(
+        'https://zelesegna.com/convene/app/get_questions.php?event=1&status=1',
+        setAnsweredQuestions
+      );
     }
   }, [activeTab]);
 
@@ -45,9 +58,15 @@ function QuestionsPage() {
     setActiveTab(tab);
   };
 
+  const handleLike = (questionId) => {
+    // Placeholder function to handle like button press
+    // You can replace this with an actual API call to like the question
+    console.log(`Liked question with id: ${questionId}`);
+  };
+
   return (
     <View style={[styles.pageContainer, { backgroundColor: currentTheme.background }]}>
-      <View style={[styles.headerContainer, { backgroundColor: currentTheme.primary }]}>
+      <View style={[styles.headerContainer, { backgroundColor: currentTheme.secondary}]}>
         <Text style={[styles.headerText, { color: currentTheme.text }]}>
           {activeTab === 'Questions' ? 'Questions' : 'Answers'}
         </Text>
@@ -56,60 +75,116 @@ function QuestionsPage() {
       <View style={[styles.contentContainer, { backgroundColor: currentTheme.secondary }]}>
         <View style={styles.tabsContainer}>
           <TouchableOpacity
-            style={[styles.tab, activeTab === 'Questions' && { backgroundColor: currentTheme.primary }]}
+            style={[styles.tab, activeTab === 'Questions' && styles.activeTab]}
             onPress={() => handleTabChange('Questions')}
           >
-            <Text style={[styles.tabText, activeTab === 'Questions' && { color: currentTheme.text }]}>
+            <Text style={[styles.tabText, activeTab === 'Questions' && styles.activeTabText]}>
               Questions ({unansweredQuestions.length})
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tab, activeTab === 'Answers' && { backgroundColor: currentTheme.primary }]}
+            style={[styles.tab, activeTab === 'Answers' && styles.activeTab]}
             onPress={() => handleTabChange('Answers')}
           >
-            <Text style={[styles.tabText, activeTab === 'Answers' && { color: currentTheme.text }]}>
+            <Text style={[styles.tabText, activeTab === 'Answers' && styles.activeTabText]}>
               Answers ({answeredQuestions.length})
             </Text>
           </TouchableOpacity>
         </View>
 
+        <View style={styles.horizontalLine} />
+
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {activeTab === 'Questions' ? (
-            unansweredQuestions.map((item) => (
-              <View key={item.question_id} style={[styles.questionContainer, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
-                <Text style={[styles.tagText, { color: currentTheme.primary }]}>#{item.position}</Text>
-                <Text style={[styles.questionText, { color: currentTheme.text }]}>{item.question}</Text>
-                <View style={styles.userContainer}>
-                  <Image source={{ uri: item.pro_pic }} style={styles.userAvatar} />
-                  <Text style={[styles.userName, { color: currentTheme.text }]}>{`${item.first_name} ${item.last_name}`}</Text>
-                  <View style={styles.voteContainer}>
-                    <Icon name="heart-outline" size={20} color={currentTheme.primary} />
-                    <Text style={[styles.voteCount, { color: currentTheme.primary }]}>{item.votes || 0}</Text>
+            unansweredQuestions.length > 0 ? (
+              unansweredQuestions.map((item) => (
+                <View
+                  key={item.question_id}
+                  style={[
+                    styles.questionContainer,
+                    {
+                      backgroundColor: currentTheme.tertiary,
+                      borderColor: currentTheme.tertiary,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.tagText, { color: currentTheme.primary }]}>
+                    #{item.position}
+                  </Text>
+                  <Text style={[styles.questionText, { color: currentTheme.text }]}>
+                    {item.question}
+                  </Text>
+                  <View style={styles.userContainer}>
+                    <Image
+                      source={{ uri: item.pro_pic }}
+                      style={styles.userAvatar}
+                    />
+                    <Text style={[styles.userName, { color: currentTheme.text }]}>
+                      {item.first_name} {item.last_name}
+                    </Text>
+                  </View>
+
+                  {/* Like button and vote count */}
+                  <View style={styles.likeContainer}>
+                    <TouchableOpacity
+                      style={styles.likeButton}
+                      onPress={() => handleLike(item.question_id)}
+                    >
+                      <Icon name="heart-outline" size={20} color={currentTheme.primary} />
+                      <Text style={[styles.voteText, { color: currentTheme.primary }]}>
+                        {item.like_count || 0} votes
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
-              </View>
-            ))
+              ))
+            ) : (
+              <Text style={[styles.noDataText, { color: currentTheme.text }]}>
+                No questions available.
+              </Text>
+            )
           ) : (
-            answeredQuestions.map((item) => (
-              <View key={item.question_id} style={[styles.answerContainer, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
-                <Text style={[styles.tagText, { color: currentTheme.primary }]}>#{item.position}</Text>
-                <Text style={[styles.answerText, { color: currentTheme.text }]}>{item.question}</Text>
-                <Text style={[styles.answerUser, { color: currentTheme.text }]}>Answered by {item.first_name} {item.last_name}</Text>
-              </View>
-            ))
+            answeredQuestions.length > 0 ? (
+              answeredQuestions.map((item) => (
+                <View
+                  key={item.question_id}
+                  style={[
+                    styles.answerContainer,
+                    {
+                      backgroundColor: currentTheme.secondary,
+                      borderColor: currentTheme.primary,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.tagText, { color: currentTheme.primary }]}>
+                    #{item.position}
+                  </Text>
+                  <Text style={[styles.answerText, { color: currentTheme.text }]}>
+                    {item.question}
+                  </Text>
+                </View>
+              ))
+            ) : (
+              <Text style={[styles.noDataText, { color: currentTheme.text }]}>
+                No answers available.
+              </Text>
+            )
           )}
 
+          {/* Ask a Question Button */}
           {activeTab === 'Questions' && (
             <TouchableOpacity
               style={[styles.askButton, { backgroundColor: currentTheme.primary }]}
               onPress={() => navigation.navigate('AskQuestion', { userName })}
             >
-              <Text style={[styles.askButtonText, { color: currentTheme.text }]}>Ask a Question</Text>
+              <Text style={[styles.askButtonText, { color: currentTheme.text }]}>
+                Ask a Question
+              </Text>
             </TouchableOpacity>
           )}
         </ScrollView>
       </View>
-      <Footer style={styles.footer} />
+      <Footer />
     </View>
   );
 }
@@ -118,68 +193,52 @@ const styles = StyleSheet.create({
   pageContainer: {
     flex: 1,
   },
+  horizontalLine: {
+    height: 1,
+    backgroundColor: 'hsl(0, 0%, 80%)',
+    marginVertical: 8,
+    marginTop: -28.5,
+  },
   headerContainer: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    padding: 10,
+    marginBottom: -15,
   },
   headerText: {
-    fontSize: 32,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   contentContainer: {
     flex: 1,
-    borderRadius: 30,
     padding: 20,
-    marginTop: -20,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    
+
   },
   tabsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 10,
-    marginBottom: 20,
-    borderRadius: 10,
+    marginBottom: 30,
   },
   tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderRadius: 20,
-    borderColor: '#ccc',
-    borderWidth: 1,
+    padding: 10,
   },
   tabText: {
     fontSize: 16,
   },
   scrollContainer: {
     paddingBottom: 20,
-    flexGrow: 1
   },
   questionContainer: {
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 15,
-    borderWidth: 2, // Add border width
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   tagText: {
     fontWeight: 'bold',
-    marginBottom: 5,
   },
   questionText: {
-    fontSize: 18,
-    marginBottom: 10,
-    textAlign: 'left',
+    fontSize: 16,
+    marginVertical: 5,
   },
   userContainer: {
     flexDirection: 'row',
@@ -192,44 +251,48 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   userName: {
-    fontSize: 16,
-    marginRight: 20,
-  },
-  voteContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  voteCount: {
-    marginLeft: 5,
     fontSize: 14,
   },
   answerContainer: {
-    marginBottom: 20,
-    padding: 20,
-    borderRadius: 15,
-    borderWidth: 2, // Add border width
+    marginBottom: 15,
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
   },
-  answerText: {
-    fontSize: 16,
-    marginBottom: 5,
-    textAlign: 'left',
+  noDataText: {
+    textAlign: 'center',
+    marginTop: 20,
   },
-  answerUser: {
+  likeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  likeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 5,
+  },
+  voteText: {
+    marginLeft: 5,
     fontSize: 14,
   },
   askButton: {
-    marginTop: 20,
-    paddingVertical: 15,
+    borderRadius: 15,
     alignItems: 'center',
-    borderRadius: 10,
-  },
-  askButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  footer: {
+    justifyContent: 'center',
+    padding: 10,
     marginTop: 10,
   },
+  activeTab: {
+    borderBottomWidth: 5, // Underline thickness
+    borderBottomColor: '#4f043d', // Underline color
+  },
+  activeTabText: {
+    color: '#4f043d', 
+    // Active tab text color
+  },
+  
 });
 
 export default QuestionsPage;

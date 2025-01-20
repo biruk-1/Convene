@@ -3,10 +3,10 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   headerStyle: {
-    backgroundColor: '#ffffff', // Background color for the header
+    backgroundColor: '#F4F1FA', // Background color for the header
   },
   headerTitleStyle: {
-    fontSize: 30, // Title font size
+    fontSize: 24, // Title font size
     fontWeight: 'bold', // Title font weight
     color: '#000', // Title font color (black)
     textAlign: 'center', // Center the text

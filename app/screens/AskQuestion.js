@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Footer from '../Components/Footer';
@@ -8,25 +8,65 @@ import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is
 
 export default function AskQuestion({ route }) {
   const navigation = useNavigation();
-  const { userName } = route.params;
+  const { userName, userId } = route.params; // Assuming userId is passed to route params
 
-  // State for tracking selected ask option
   const [selectedOption, setSelectedOption] = useState(null);
+  const [question, setQuestion] = useState('');
 
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
+  // Function to handle API request
+  const submitQuestion = async () => {
+    if (!question || !selectedOption) {
+      Alert.alert("Error", "Please enter a question and select an option.");
+      return;
+    }
+
+    // Determine askType based on selectedOption
+    const askType = selectedOption === 'anonymous' ? '0' : userId; // '0' for anonymous, userId for named
+
+    const payload = {
+      question: question,
+      askType: askType, // This will be '0' or userId depending on selection
+      event: '1', // Assuming '1' as shown in Postman example
+    };
+
+    try {
+      const response = await fetch('https://zelesegna.com/convene/app/ask_question.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(payload).toString(), // Convert payload to URL-encoded string
+      });
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        Alert.alert("Success", "Your question has been submitted!");
+        setQuestion(''); // Reset question field
+        setSelectedOption(null); // Reset selection
+        navigation.goBack(); // Go back to the previous screen
+      } else {
+        Alert.alert("Error", data.result || "An error occurred.");
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      Alert.alert("Error", "Could not submit your question. Please try again.");
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
-      {/* Input box for question */}
       <TextInput
         placeholder="State your question here..."
         placeholderTextColor="#b0b0b0"
         style={[styles.input, { backgroundColor: currentTheme.secondary, color: currentTheme.text }]}
         multiline
+        value={question}
+        onChangeText={setQuestion}
       />
 
-      {/* Ask options */}
       <View style={styles.askOptionsContainer}>
         <TouchableOpacity
           style={[
@@ -48,7 +88,7 @@ export default function AskQuestion({ route }) {
               selectedOption === 'user' && { color: currentTheme.text, fontWeight: 'bold' },
             ]}
           >
-            Ask as {userName}
+            Ask as <Text style={{ fontWeight: 'bold' }}>{userName}</Text>
           </Text>
         </TouchableOpacity>
 
@@ -77,7 +117,13 @@ export default function AskQuestion({ route }) {
         </TouchableOpacity>
       </View>
 
-      {/* Back button */}
+      <TouchableOpacity
+        style={[styles.submitButton, { backgroundColor: currentTheme.primary }]}
+        onPress={submitQuestion}
+      >
+        <Text style={[styles.submitButtonText, { color: currentTheme.background }]}>Submit Question</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.cancelButton, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
         <Text style={[styles.cancelButtonText, { color: currentTheme.primary }]}>Cancel</Text>
       </TouchableOpacity>
@@ -121,8 +167,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
   },
+  submitButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   cancelButton: {
-    marginTop: 30,
+    marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     alignSelf: 'center',

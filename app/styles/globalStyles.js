@@ -1,91 +1,51 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
+
+// Responsive scaling function
+const scale = (size) => (width / 375) * size; // 375 is the base width (iPhone 6/7/8)
 
 export const globalStyles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  input: {
-    width: '100%',
-    padding: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 10,
-    backgroundColor: '#f8f8f8',
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-  },
-  cameraIcon: {
-    fontSize: 30,
-    color: '#007AFF',
-    marginBottom: 10,
-  },
-  galleryContainer: {
-    flex: 1,
-    marginTop: 10,
-  },
-  galleryItem: {
-    width: 100,
-    height: 100,
-    margin: 5,
-  },
-
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff', // Same background as SplashScreen
+    padding: scale(20),
   },
   logo: {
-    width: 150, // Adjust as needed
-    height: 150, // Adjust as needed
-    marginBottom: 30, // Adds space below the logo
+    width: scale(150), // Responsive logo size
+    height: scale(150), // Maintain aspect ratio
+    marginBottom: scale(30),
   },
   title: {
-    fontSize: 24,
+    fontSize: scale(24),
     fontWeight: 'bold',
-    color: '#cc0077', // Pink color for the title
-    marginBottom: 20,
+    marginBottom: scale(20),
   },
-  inputPinkBorder: {
-    width: '80%', // Full-width input
-    borderColor: '#cc0077', // Pink border
-    borderWidth: 2,
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 20,
-    backgroundColor: '#fff', // White background for input
+  input: {
+    width: '90%',
+    height: scale(50),
+    paddingHorizontal: scale(15),
+    marginBottom: scale(20),
+    borderWidth: 1,
+    borderRadius: scale(10),
+    fontSize: scale(16),
   },
-  fullButtonPink: {
-    width: '80%',
-    padding: 15,
-    backgroundColor: '#cc0077', // Pink background for button
-    borderRadius: 10,
+  loginButton: {
+    width: '90%',
+    height: scale(50),
+    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: scale(10),
+    marginBottom: scale(10),
   },
   buttonText: {
-    color: '#fff', // White text for button
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: 'bold',
+  },
+  forgotPasswordText: {
+    marginTop: scale(10),
+    fontSize: scale(14),
+    textDecorationLine: 'underline',
   },
 });

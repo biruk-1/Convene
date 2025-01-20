@@ -14,7 +14,7 @@ const FeedbackHeader = ({ onPress }) => {
       {/* Profile Section */}
       <View style={styles.profileContainer}>
         <Image 
-          source={require('../../assets/images/logo.png')} // Adjust the path as necessary
+          source={require('../../assets/images/convene-logo.png')} // Adjust the path as necessary
           style={styles.profileImage} 
         />
         <View style={styles.profileTextContainer}>
@@ -45,14 +45,15 @@ const styles = StyleSheet.create({
   headerContainer: {
     padding: 15,
     alignItems: 'flex-start', // Aligns content to the start
-    borderRadius: 10, // Rounded corners for visual appeal
-    borderWidth: 1,
+    // borderRadius: 10, // Rounded corners for visual appeal
+    // borderWidth: 0.5,
     shadowColor: '#000', // Adds a shadow for depth
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3, // For Android shadow support
-    marginBottom: 20, // Space below the header
+    marginBottom: 10,
+    marginTop:5 // Space below the header
   },
   profileContainer: {
     flexDirection: 'row',
@@ -63,7 +64,8 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25, // Circle image
-    marginRight: 10, // Space between image and text
+    marginRight: 10,
+     // Space between image and text
   },
   profileTextContainer: {
     justifyContent: 'flex-start', // Align text to start

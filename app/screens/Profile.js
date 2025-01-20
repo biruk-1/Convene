@@ -1,23 +1,44 @@
 import React, { useContext } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Footer from '../Components/Footer';
 import { ThemeContext } from '../context/ThemeContext';
-import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
+import { lightTheme, darkTheme } from '../context/themes';
+import { useAuth } from './AuthContext'; // Assuming AuthContext is in the same directory
 
-const Profile = () => {
+const Profile = ({ navigation }) => {
   const userName = "John Doe"; // Replace with dynamic user data
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
+  const { logout } = useAuth(); // Access the logout function from AuthContext
+
+  // Confirm logout and perform the action
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: () => {
+            logout(); // Clear session and navigate to login screen
+            navigation.replace('Login'); // Navigate to Login screen
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={[styles.profileSection, { backgroundColor: currentTheme.secondary }]}>
           <View style={styles.profileImageContainer}>
-            <Image 
+            <Image
               source={{ uri: 'https://via.placeholder.com/150' }} // Replace with dynamic user image
-              style={styles.profileImage} 
+              style={styles.profileImage}
             />
             <TouchableOpacity style={[styles.editIcon, { backgroundColor: currentTheme.primary }]}>
               <MaterialIcons name="edit" size={20} color={currentTheme.text} />
@@ -30,18 +51,18 @@ const Profile = () => {
           <MenuItem icon="lock" title="Change Password" theme={currentTheme} />
           <MenuItem icon="notifications" title="Notification Settings" theme={currentTheme} />
           <MenuItem icon="report-problem" title="Report Problem" theme={currentTheme} />
-          <MenuItem icon="logout" title="Logout" theme={currentTheme} />
+          <MenuItem icon="logout" title="Logout" theme={currentTheme} onPress={handleLogout} />
         </View>
       </ScrollView>
-      
+
       <Footer style={styles.footer} />
     </View>
   );
 };
 
-const MenuItem = ({ icon, title, theme }) => {
+const MenuItem = ({ icon, title, theme, onPress }) => {
   return (
-    <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.primary }]}>
+    <TouchableOpacity style={[styles.menuItem, { borderBottomColor: theme.primary }]} onPress={onPress}>
       <MaterialIcons name={icon} size={24} color={theme.primary} />
       <Text style={[styles.menuTitle, { color: theme.text }]}>{title}</Text>
     </TouchableOpacity>

@@ -1,18 +1,24 @@
-// SplashScreen.tsx
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SplashScreen = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
-    if (!navigation) {
-      console.error("Navigation prop is not passed to SplashScreen");
-    } else {
-      // Automatically navigate to LoginScreen after 3 seconds
-      const timer = setTimeout(() => {
-        navigation.replace('Login');
-      }, 3000);
-      return () => clearTimeout(timer); // Cleanup timer
-    }
+    const checkLoginStatus = async () => {
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      if (isLoggedIn === 'true') {
+        const userId = await AsyncStorage.getItem('userId');
+        // Navigate directly to main screen if logged in
+        navigation.replace('EventList', { participantId: userId });
+      } else {
+        // Navigate to Login screen after 3 seconds
+        setTimeout(() => {
+          navigation.replace('Login');
+        }, 3000);
+      }
+    };
+
+    checkLoginStatus();
   }, [navigation]);
 
   return (
@@ -25,11 +31,10 @@ const SplashScreen = ({ navigation }: { navigation: any }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   splashContainer: {
     flex: 1,
-    backgroundColor: '#cc0077', // Adjust to your background color
+    backgroundColor: '#cc0077',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -37,7 +42,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoText: {
-    fontSize: 50, // Adjust based on your logo size
+    fontSize: 50,
     color: 'white',
     fontWeight: 'bold',
   },

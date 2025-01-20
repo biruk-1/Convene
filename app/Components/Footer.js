@@ -79,6 +79,6 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   activeCircle: {
-    backgroundColor: '#cc0077',
+    backgroundColor: '#31083D',
   },
 });

@@ -1,5 +1,6 @@
 {
   "expo": {
+    "newArchEnabled": true,
     "name": "NewConveneProject",
     "slug": "NewConveneProject",
     "version": "1.0.0",
