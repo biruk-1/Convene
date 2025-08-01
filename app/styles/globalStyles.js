@@ -48,4 +48,14 @@ export const globalStyles = StyleSheet.create({
     fontSize: scale(14),
     textDecorationLine: 'underline',
   },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
 });

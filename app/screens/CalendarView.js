@@ -1,29 +1,42 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Animated, FlatList } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Dimensions, 
+  TouchableOpacity, 
+  Animated, 
+  FlatList,
+  StatusBar,
+  SafeAreaView,
+  Platform
+} from 'react-native';
 import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import Footer from '../Components/Footer';
 import dayjs from 'dayjs';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const CalendarView = () => {
   const today = dayjs();
   const [selectedDate, setSelectedDate] = useState(today);
   const [meetings, setMeetings] = useState([]);
   const [eventDates, setEventDates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   const translateX = useRef(new Animated.Value(0)).current;
-  const currentPage = useRef(0); // Tracks the page number
+  const currentPage = useRef(0);
 
   useEffect(() => {
     const fetchMeetings = async () => {
       try {
+        setLoading(true);
         const response = await fetch('https://zelesegna.com/convene/app/get_schedule.php?event=1');
         const data = await response.json();
         const formattedMeetings = data.result.map(meeting => {
@@ -47,6 +60,8 @@ const CalendarView = () => {
         setEventDates(uniqueDates);
       } catch (error) {
         console.error('Error fetching the data:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchMeetings();
@@ -63,47 +78,77 @@ const CalendarView = () => {
     dayjs(meeting.date).isSame(selectedDate, 'day')
   );
 
-  const renderMeeting = ({ item: meeting }) => {
+  const renderMeeting = ({ item: meeting, index }) => {
     const status = getMeetingStatus(meeting.startTime, meeting.endTime);
     const isOngoing = status === 'ongoing';
     const isPast = status === 'past';
+    const isFuture = status === 'future';
+    const isLast = index === filteredMeetings.length - 1;
 
     return (
-      <View style={[styles.meetingContainer, { backgroundColor: currentTheme.secondary }]}>
-        <View style={styles.leftPart}>
+      <View style={styles.meetingContainer}>
+        {/* Time Column - Left Side */}
+        <View style={styles.timeColumn}>
           <Text style={[
-            styles.timeText,
-            isPast && styles.pastText,
-            isOngoing && styles.boldText,
-            { color: currentTheme.text }
+            styles.meetingTime,
+            { 
+              color: isPast ? '#999' : isOngoing ? '#4A148C' : currentTheme.text,
+              textDecorationLine: isPast ? 'line-through' : 'none',
+              opacity: isPast ? 0.6 : 1
+            }
           ]}>
             {meeting.time}
           </Text>
-          <TouchableOpacity disabled={!isOngoing}>
-            <View style={[
-              styles.circle,
-              isOngoing ? styles.activeCircle : isPast ? styles.pastCircle : styles.futureCircle
-            ]} />
-          </TouchableOpacity>
         </View>
-        <View style={[styles.divider, { backgroundColor: currentTheme.text }]} />
-        <View style={styles.rightPart}>
+
+        {/* Timeline Column - Center */}
+        <View style={styles.timelineColumn}>
+          <View style={styles.timelineContainer}>
+            <View style={styles.timelineLine}>
+              {!isLast && <View style={[styles.verticalLine, { backgroundColor: theme === 'dark' ? '#333' : '#e0e0e0' }]} />}
+            </View>
+            <View style={[
+              styles.timelineCircle,
+              { 
+                backgroundColor: isOngoing ? '#4A148C' : isPast ? '#999' : '#666',
+                borderWidth: isOngoing ? 2 : 0,
+                borderColor: isOngoing ? '#fff' : 'transparent'
+              }
+            ]}>
+              {isOngoing && <Ionicons name="checkmark" size={8} color="#fff" />}
+            </View>
+          </View>
+        </View>
+
+        {/* Event Details Column - Right Side */}
+        <View style={styles.eventDetailsColumn}>
           <Text style={[
             styles.meetingTitle,
-            isPast && styles.pastText,
-            isOngoing && styles.boldText,
-            { color: currentTheme.text }
+            { 
+              color: isPast ? '#999' : isOngoing ? '#4A148C' : currentTheme.text,
+              textDecorationLine: isPast ? 'line-through' : 'none',
+              opacity: isPast ? 0.6 : 1
+            }
           ]}>
             {meeting.title}
           </Text>
-          <MeetingDetail icon="location-outline" text={meeting.room} isPast={isPast} isOngoing={isOngoing} />
-          <MeetingDetail icon="calendar-outline" text={meeting.date} isPast={isPast} isOngoing={isOngoing} />
-          <MeetingDetail
-            icon="time-outline"
-            text={`${meeting.startTime.format('HH:mm')} - ${meeting.endTime.format('HH:mm')}`}
-            isPast={isPast}
-            isOngoing={isOngoing}
-          />
+          
+          <View style={styles.meetingDetails}>
+            <MeetingDetail icon="location-outline" text={meeting.room} status={status} />
+            <MeetingDetail icon="calendar-outline" text={meeting.date} status={status} />
+            <MeetingDetail
+              icon="time-outline"
+              text={`${meeting.startTime.format('HH:mm')} - ${meeting.endTime.format('HH:mm')}`}
+              status={status}
+            />
+          </View>
+
+          {/* Status Indicator */}
+          {isOngoing && (
+            <View style={styles.statusIndicator}>
+              <Text style={styles.statusText}>Happening Now</Text>
+            </View>
+          )}
         </View>
       </View>
     );
@@ -123,101 +168,314 @@ const CalendarView = () => {
     const isSelected = dayjs(item).isSame(selectedDate, 'day');
     return (
       <TouchableOpacity onPress={() => setSelectedDate(dayjs(item))} style={styles.dateItem}>
-        <View style={[styles.dateCircle, isSelected && styles.selectedDateCircle]}>
-          <Text style={[styles.dayText, { color: currentTheme.text }]}>{dayjs(item).format('ddd')}</Text>
-          <Text style={[styles.dateText, { color: currentTheme.text }]}>{dayjs(item).format('DD')}</Text>
+        <View style={[
+          styles.dateCircle, 
+          isSelected && styles.selectedDateCircle,
+          { backgroundColor: isSelected ? '#4A148C' : theme === 'dark' ? '#333' : '#f0f0f0' }
+        ]}>
+          <Text style={[
+            styles.dayText, 
+            { color: isSelected ? '#fff' : currentTheme.text }
+          ]}>
+            {dayjs(item).format('ddd')}
+          </Text>
+          <Text style={[
+            styles.dateText, 
+            { color: isSelected ? '#fff' : currentTheme.text }
+          ]}>
+            {dayjs(item).format('DD')}
+          </Text>
         </View>
       </TouchableOpacity>
     );
   };
 
-  const MeetingDetail = ({ icon, text, isPast, isOngoing }) => (
-    <View style={styles.meetingDetail}>
-      <Icon name={icon} size={16} color={currentTheme.text} />
-      <Text style={[
-        styles.detailText,
-        isPast && styles.pastText,
-        isOngoing && styles.boldText,
-        { color: currentTheme.text }
-      ]}>
-        {text}
+  const MeetingDetail = ({ icon, text, status }) => {
+    const isPast = status === 'past';
+    const isOngoing = status === 'ongoing';
+    const isFuture = status === 'future';
+    
+    return (
+      <View style={styles.meetingDetail}>
+        <Ionicons 
+          name={icon} 
+          size={14} 
+          color={isPast ? '#999' : isOngoing ? '#4A148C' : '#666'} 
+        />
+        <Text style={[
+          styles.detailText,
+          { 
+            color: isPast ? '#999' : isOngoing ? '#4A148C' : '#666',
+            textDecorationLine: isPast ? 'line-through' : 'none',
+            opacity: isPast ? 0.6 : 1
+          }
+        ]}>
+          {text}
+        </Text>
+      </View>
+    );
+  };
+
+  const EmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.catEmoji}>🐱</Text>
+      <Text style={[styles.emptyText, { color: currentTheme.text }]}>
+        No meetings for the selected date
+      </Text>
+      <Text style={[styles.emptySubtext, { color: currentTheme.text }]}>
+        Take a break and enjoy your day!
       </Text>
     </View>
   );
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
-        <Text style={styles.activityTimeText}>Schedule</Text>
-        <View style={styles.dateContainer}>
-          <Text style={styles.activityText}>Activity Date</Text>
-          <PanGestureHandler
-            onGestureEvent={Animated.event([{ nativeEvent: { translationX: translateX } }], { useNativeDriver: true })}
-            onEnded={handleGestureEnd}
-          >
-            <Animated.View style={{ transform: [{ translateX }] }}>
-              <FlatList
-                data={eventDates.slice(currentPage.current * 6, (currentPage.current + 1) * 6)}
-                renderItem={renderDate}
-                keyExtractor={(item, index) => index.toString()}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-              />
-            </Animated.View>
-          </PanGestureHandler>
-        </View>
-        <FlatList
-          data={filteredMeetings}
-          renderItem={renderMeeting}
-          keyExtractor={item => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          style={styles.meetingListContainer}
-          ListEmptyComponent={() => (
-            <Text style={[styles.noMeetingsText, { color: currentTheme.text }]}>
-              No meetings for the selected date.
-            </Text>
-          )}
+      <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+        <StatusBar 
+          barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} 
+          backgroundColor={currentTheme.background} 
         />
+        
+        {/* Main Header - Convene Calendar */}
+        <View style={[styles.header, { backgroundColor: currentTheme.background }]}>
+          <View style={styles.headerTopRow}>
+            <View style={styles.headerLeft}>
+              <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
+              <Text style={[styles.calendarTitle, { color: currentTheme.text }]}>Calendar</Text>
+            </View>
+            <View style={styles.headerIcons}>
+              <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+                <Ionicons name="notifications-outline" size={22} color={currentTheme.text} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+                <Ionicons name="download-outline" size={22} color={currentTheme.text} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* Calendar Content */}
+        <View style={styles.contentContainer}>
+          <View style={[styles.dateContainer, { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#f8f9fa' }]}>
+            <Text style={[styles.activityText, { color: currentTheme.text }]}>Activity Date</Text>
+            <PanGestureHandler
+              onGestureEvent={Animated.event([{ nativeEvent: { translationX: translateX } }], { useNativeDriver: true })}
+              onEnded={handleGestureEnd}
+            >
+              <Animated.View style={{ transform: [{ translateX }] }}>
+                <FlatList
+                  data={eventDates.slice(currentPage.current * 6, (currentPage.current + 1) * 6)}
+                  renderItem={renderDate}
+                  keyExtractor={(item, index) => index.toString()}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                />
+              </Animated.View>
+            </PanGestureHandler>
+          </View>
+          
+          <FlatList
+            data={filteredMeetings}
+            renderItem={renderMeeting}
+            keyExtractor={item => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            style={styles.meetingListContainer}
+            contentContainerStyle={styles.meetingListContent}
+            ListEmptyComponent={EmptyState}
+          />
+        </View>
+        
         <Footer />
-      </View>
+      </SafeAreaView>
     </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingBottom: 20 },
-  dateItem: { width: width / 6, alignItems: 'center' },
-  dateCircle: { padding: 10, borderRadius: 50, alignItems: 'center',backgroundColor:'#adadad', borderRadius: width - 0.5,paddingTop:10,paddingBottom:20},
-  dateContainer:{border: '1 solid #c8c6c6', padding: 20,margin:10, borderRadius:20, paddingBottom: 20,backgroundColor: '#605d5d'},
-  selectedDateCircle: {  backgroundColor:'#faf6f8', borderRadius: width - 0.5,paddingBottom:15,paddingTop:15,},
-  dayText: { fontSize: 14, fontWeight: 'bold' },
-  dateText: { fontSize: 18 },
-  activityTimeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#656464',
-    textAlign: 'start',
-    marginLeft: 20,
-    paddingTop: '2%',
-    letterSpacing: 1.5,
-    // textTransform: 'uppercase',
+  container: {
+    flex: 1,
   },
-  activityText: { fontSize: 16, fontWeight: 'bold',color: '#a7a3a3', paddingLeft:10,paddingBottom:10,marginBottom:10},
-  meetingListContainer: { flex: 1, paddingHorizontal: 15 },
-  meetingContainer: { flexDirection: 'row', borderRadius: 10, marginBottom: 15, padding: 15 },
-  leftPart: { justifyContent: 'center', alignItems: 'center', marginRight: 20 },
-  circle: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#ccc' },
-  activeCircle: { backgroundColor: '#faf6f8', borderRadius:8 },
-  pastCircle: { backgroundColor: '#999' },
-  futureCircle: { backgroundColor: '#00aa77' },
-  divider: { width: 1, marginVertical: 0, marginLeft:'22%',marginRight:'4%'  },
-  rightPart: { flex: 1 },
-  meetingTitle: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
-  boldText: { fontWeight: 'bold' },
-  pastText: { textDecorationLine: 'line-through', color: '#888' },
-  meetingDetail: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-  detailText: { marginLeft: 8 },
-  noMeetingsText: { textAlign: 'center', marginTop: 20 },
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 4 : 8,
+  },
+  headerLeft: {
+    flex: 1,
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  calendarTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginLeft: 6,
+  },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  dateContainer: {
+    marginBottom: 24,
+    padding: 20,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  dateItem: { 
+    width: width / 6, 
+    alignItems: 'center' 
+  },
+  dateCircle: { 
+    padding: 12, 
+    borderRadius: 8, 
+    alignItems: 'center',
+    minWidth: 60,
+    minHeight: 60,
+    justifyContent: 'center',
+  },
+  selectedDateCircle: { 
+    backgroundColor: '#4A148C',
+  },
+  dayText: { 
+    fontSize: 12, 
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  dateText: { 
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  activityText: { 
+    fontSize: 16, 
+    fontWeight: '600', 
+    marginBottom: 16,
+  },
+  meetingListContainer: { 
+    flex: 1,
+  },
+  meetingListContent: {
+    paddingBottom: 20,
+  },
+  meetingContainer: { 
+    flexDirection: 'row',
+    marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  timeColumn: {
+    width: 80,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    paddingTop: 8,
+  },
+  timelineColumn: {
+    width: 40,
+    alignItems: 'center',
+    marginHorizontal: 16,
+  },
+  timelineContainer: {
+    alignItems: 'center',
+    position: 'relative',
+    width: 20,
+  },
+  timelineLine: {
+    position: 'absolute',
+    top: 20,
+    bottom: -24,
+    left: 9,
+    alignItems: 'center',
+  },
+  verticalLine: {
+    width: 2,
+    flex: 1,
+  },
+  timelineCircle: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginTop: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  eventDetailsColumn: {
+    flex: 1,
+    paddingTop: 8,
+  },
+  meetingTime: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  meetingTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  meetingDetails: {
+    gap: 4,
+  },
+  meetingDetail: { 
+    flexDirection: 'row', 
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  detailText: { 
+    marginLeft: 8,
+    fontSize: 14,
+  },
+  statusIndicator: {
+    backgroundColor: '#4A148C',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  statusText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  catEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
+  },
 });
 
 export default CalendarView;

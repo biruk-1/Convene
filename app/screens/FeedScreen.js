@@ -1,27 +1,68 @@
 import React, { useContext } from 'react';
-import { View, StyleSheet, ScrollView ,Text} from 'react-native';
+import { 
+  View, 
+  StyleSheet, 
+  Text, 
+  StatusBar, 
+  SafeAreaView, 
+  Platform,
+  Dimensions,
+  TouchableOpacity,
+  ScrollView
+} from 'react-native';
 import Feed from '../Components/Feed';
 import Footer from '../Components/Footer';
 import FeedbackHeader from './FeedbackHeader';
 import { ThemeContext } from '../context/ThemeContext';
-import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
+import { lightTheme, darkTheme } from '../context/themes';
+import { Ionicons } from '@expo/vector-icons';
+
+const { width, height } = Dimensions.get('window');
 
 const FeedScreen = () => {
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   return (
-    <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-      <View style={[styles.header, { backgroundColor: currentTheme.secondary }]}>
-             <Text style={[styles.headerText, { color: currentTheme.text }]}>Feed</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <StatusBar 
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={currentTheme.background} 
+      />
+      
+      {/* Header Section - Matching Screenshot */}
+      <View style={[styles.header, { backgroundColor: currentTheme.background }]}>
+        {/* Top Row with App Name and Icons */}
+        <View style={styles.headerTopRow}>
+          <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Ionicons name="notifications-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+                              <Ionicons name="download-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+          </View>
         </View>
+        
+        {/* Feed Title */}
+        <Text style={[styles.feedTitle, { color: currentTheme.text }]}>Feed</Text>
+      </View>
+      
+      {/* Scrollable Content Area */}
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        bounces={true}
+      >
         <FeedbackHeader />
         <Feed />
       </ScrollView>
-      {/* Fixed Footer */}
-      <Footer style={[styles.footer, { backgroundColor: currentTheme.secondary }]} />
-    </View>
+      
+      {/* Modern Footer */}
+      <Footer />
+    </SafeAreaView>
   );
 };
 
@@ -29,28 +70,44 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    paddingBottom: 100, // Add padding so content doesn't overlap with footer
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60, // Adjust height of the footer as necessary
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10, // Ensures the footer is above other content
-  },
   header: {
-    paddingTop:'2%',
-    paddingBottom:'2%',
-    paddingLeft:'5%',
-    paddingVertical: 3,
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
-  headerText: {
-    fontSize: 20,
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 4 : 8,
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginLeft: 6,
+  },
+  feedTitle: {
+    fontSize: 24,
     fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 0, // Remove extra padding to fix footer spacing
   },
 });
 

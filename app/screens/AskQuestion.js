@@ -1,10 +1,23 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Alert,
+  StatusBar,
+  SafeAreaView,
+  Platform,
+  Dimensions
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Footer from '../Components/Footer';
 import { ThemeContext } from '../context/ThemeContext';
-import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
+import { lightTheme, darkTheme } from '../context/themes';
+
+const { width, height } = Dimensions.get('window');
 
 export default function AskQuestion({ route }) {
   const navigation = useNavigation();
@@ -57,15 +70,40 @@ export default function AskQuestion({ route }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
-      <TextInput
-        placeholder="State your question here..."
-        placeholderTextColor="#b0b0b0"
-        style={[styles.input, { backgroundColor: currentTheme.secondary, color: currentTheme.text }]}
-        multiline
-        value={question}
-        onChangeText={setQuestion}
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <StatusBar 
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={currentTheme.background} 
       />
+      
+      {/* Header Section - Matching FeedScreen and CalendarView */}
+      <View style={[styles.header, { backgroundColor: currentTheme.background }]}>
+        {/* Top Row with App Name and Icons */}
+        <View style={styles.headerTopRow}>
+          <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Icon name="download-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+        {/* Ask Question Title */}
+        <Text style={[styles.askQuestionTitle, { color: currentTheme.text }]}>Ask Question</Text>
+      </View>
+
+      <View style={styles.contentContainer}>
+        <TextInput
+          placeholder="State your question here..."
+          placeholderTextColor="#b0b0b0"
+          style={[styles.input, { backgroundColor: currentTheme.secondary, color: currentTheme.text }]}
+          multiline
+          value={question}
+          onChangeText={setQuestion}
+        />
 
       <View style={styles.askOptionsContainer}>
         <TouchableOpacity
@@ -127,12 +165,51 @@ export default function AskQuestion({ route }) {
       <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.cancelButton, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
         <Text style={[styles.cancelButtonText, { color: currentTheme.primary }]}>Cancel</Text>
       </TouchableOpacity>
+      
+      <Footer />
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 4 : 8,
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginLeft: 6,
+  },
+  askQuestionTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  contentContainer: {
     flex: 1,
     padding: 20,
   },

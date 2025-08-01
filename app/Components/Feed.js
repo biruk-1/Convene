@@ -1,24 +1,45 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, ActivityIndicator, Modal, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Image, 
+  FlatList, 
+  TouchableOpacity, 
+  ActivityIndicator, 
+  Modal, 
+  ScrollView,
+  Dimensions,
+  Platform 
+} from 'react-native';
 import { useRoute } from '@react-navigation/native';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+const { width, height } = Dimensions.get('window');
 
 const Feed = () => {
   const route = useRoute();
-  const { eventId } = route.params;
+  const { eventId } = route.params || {};
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [expandedPost, setExpandedPost] = useState(null); // Track expanded post for "Show More"
+  const [expandedPost, setExpandedPost] = useState(null);
 
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   const fetchData = async () => {
+    if (!eventId) {
+      setError('Event ID is required');
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(`https://zelesegna.com/convene/app/get_feed.php?event=${eventId}`);
       const result = await response.json();
@@ -47,13 +68,13 @@ const Feed = () => {
   };
 
   const handleShowMoreToggle = (postId) => {
-    setExpandedPost(expandedPost === postId ? null : postId); // Toggle expand/collapse
+    setExpandedPost(expandedPost === postId ? null : postId);
   };
 
   if (loading) {
     return (
       <View style={[styles.centerContainer, { backgroundColor: currentTheme.background }]}>
-        <ActivityIndicator size="large" color={currentTheme.primary} />
+        <ActivityIndicator size="large" color="#4A148C" />
       </View>
     );
   }
@@ -62,7 +83,7 @@ const Feed = () => {
     return (
       <View style={[styles.centerContainer, { backgroundColor: currentTheme.background }]}>
         <Text style={[styles.errorText, { color: currentTheme.text }]}>Error: {error}</Text>
-        <TouchableOpacity style={[styles.retryButton, { backgroundColor: currentTheme.primary }]} onPress={fetchData}>
+        <TouchableOpacity style={styles.retryButton} onPress={fetchData}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -71,46 +92,66 @@ const Feed = () => {
 
   const renderFeedItem = ({ item }) => {
     const isTextExpanded = expandedPost === item.feed_id;
-    const shouldShowMoreButton = item.text_content.length > 120; // Adjust limit for "Show More"
+    const shouldShowMoreButton = item.text_content.length > 120;
 
     return (
-      <View style={[styles.postContainer, { backgroundColor: currentTheme.secondary }]}>
+      <View style={[styles.postContainer, { backgroundColor: currentTheme.background }]}>
+        {/* Post Header - Full Width */}
         <View style={styles.postHeader}>
           <Image source={{ uri: item.pro_pic }} style={styles.profileImage} />
-          <View>
-            <Text style={[styles.name, { color: currentTheme.text }]}>{`${item.first_name} ${item.middle_name} ${item.last_name}`}</Text>
-            <Text style={[styles.position, { color: currentTheme.text }]}>{item.position}</Text>
+          <View style={styles.userInfo}>
+            <Text style={[styles.name, { color: currentTheme.text }]}>
+              {`${item.first_name} ${item.middle_name} ${item.last_name}`}
+            </Text>
+            <Text style={[styles.position, { color: currentTheme.text }]}>
+              {item.position}
+            </Text>
           </View>
         </View>
         
-        {/* Post Image with Full-Screen Modal */}
+        {/* Post Image - Full Width */}
         {item.img_url && (
-          <TouchableOpacity onPress={() => handleImagePress(item.img_url)}>
+          <TouchableOpacity onPress={() => handleImagePress(item.img_url)} activeOpacity={0.9}>
             <Image source={{ uri: item.img_url }} style={styles.postImage} />
           </TouchableOpacity>
         )}
 
-          {/* Post Text with "Show More" */}
+        {/* Post Text - Full Width */}
+        <View style={styles.postTextContainer}>
           <Text style={[styles.postText, { color: currentTheme.text }]} numberOfLines={isTextExpanded ? undefined : 4}>
-          {item.text_content}
-        </Text>
-        {shouldShowMoreButton && (
-          <TouchableOpacity onPress={() => handleShowMoreToggle(item.feed_id)}>
-            <Text style={[styles.showMoreText, { color: currentTheme.primary }]}>
-              {isTextExpanded ? 'Show Less' : 'Show More'}
+            {item.text_content}
+          </Text>
+          {shouldShowMoreButton && (
+            <TouchableOpacity onPress={() => handleShowMoreToggle(item.feed_id)}>
+              <Text style={[styles.showMoreText, { color: '#4A148C' }]}>
+                {isTextExpanded ? 'Show Less' : 'Show More'}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Post Footer - Full Width Interaction Bar */}
+        <View style={[styles.postFooter, { borderTopColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
+          <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
+            <Icon name="heart" size={22} color="#FF3B30" />
+            <Text style={[styles.interactionText, { color: currentTheme.text }]}>
+              {item.like_count || 0}
             </Text>
           </TouchableOpacity>
-        )}
-
-        <View style={styles.postFooter}>
-          <TouchableOpacity style={styles.footerIcon}>
-            <Text style={{ color: currentTheme.text }}>❤️ {item.like_count}</Text>
+          
+          <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
+            <Icon name="chatbubble-outline" size={22} color={currentTheme.text} />
+            <Text style={[styles.interactionText, { color: currentTheme.text }]}>
+              {item.comment_count || 0}
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.footerIcon}>
-            <Text style={{ color: currentTheme.text }}>💬 {item.comment_count || 0}</Text>
+          
+          <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
+            <Icon name="arrow-redo-outline" size={22} color={currentTheme.text} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.footerIcon}>
-            <Text style={{ color: currentTheme.text }}>🔗</Text>
+          
+          <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
+            <Icon name="bookmark-outline" size={22} color={currentTheme.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -126,18 +167,16 @@ const Feed = () => {
         showsVerticalScrollIndicator={false}
         refreshing={loading}
         onRefresh={fetchData}
-        // ListHeaderComponent={() => (
-        //   <View style={[styles.header, { backgroundColor: currentTheme.secondary }]}>
-        //     <Text style={[styles.headerText, { color: currentTheme.text }]}>Feed</Text>
-        //   </View>
-        // )}
+        contentContainerStyle={styles.listContainer}
+        ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }]} />}
+        scrollEnabled={false} // Disable scroll since parent handles it
       />
 
       {/* Full-Image Modal */}
-      <Modal visible={modalVisible} transparent={true} animationType="slide">
+      <Modal visible={modalVisible} transparent={true} animationType="fade">
         <View style={styles.modalContainer}>
           <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalCloseButton}>
-            <Text style={{ color: '#fff', fontSize: 18 }}>Close</Text>
+            <Icon name="close" size={24} color="#fff" />
           </TouchableOpacity>
           {selectedImage && (
             <Image source={{ uri: selectedImage }} style={styles.fullImage} />
@@ -153,93 +192,113 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    minHeight: 200,
   },
   errorText: {
     marginBottom: 10,
     fontSize: 16,
   },
   retryButton: {
-    padding: 10,
-    borderRadius: 5,
+    backgroundColor: '#4A148C',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   retryButtonText: {
     color: '#fff',
+    fontWeight: '600',
+  },
+  listContainer: {
+    paddingBottom: 20, // Reduced padding to fix footer spacing
+  },
+  separator: {
+    height: 1,
   },
   postContainer: {
-    marginBottom: 5,
-    padding: 12,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    width: '100%',
+    marginBottom: 0,
   },
   postHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    marginRight: 12,
+  },
+  userInfo: {
+    flex: 1,
   },
   name: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    marginBottom: 2,
   },
   position: {
     fontSize: 14,
-    color: '#888',
-  },
-  postText: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 10,
-  },
-  showMoreText: {
-    fontSize: 14,
-    marginTop: 4,
+    opacity: 0.7,
   },
   postImage: {
     width: '100%',
-    height: 230,
-    borderRadius: 8,
-    marginBottom: 8,
+    height: width * 0.6, // Reduced height from 0.75 to 0.6
+    resizeMode: 'cover',
+    borderRadius: 12, // Added border radius to all sides
+  },
+  postTextContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  postText: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  showMoreText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginTop: 8,
   },
   postFooter: {
     flexDirection: 'row',
-    marginTop: 25,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
   },
   footerIcon: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
   },
-  header: {
-    paddingVertical: 12,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: '700',
+  interactionText: {
+    fontSize: 14,
+    marginLeft: 6,
+    fontWeight: '500',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalCloseButton: {
     position: 'absolute',
-    top: 40,
+    top: Platform.OS === 'ios' ? 60 : 40,
     right: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    padding: 8,
   },
   fullImage: {
-    width: '90%',
-    height: '80%',
-    borderRadius: 10,
+    width: '95%',
+    height: '85%',
+    borderRadius: 12,
     resizeMode: 'contain',
   },
 });

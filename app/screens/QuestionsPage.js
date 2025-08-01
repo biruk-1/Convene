@@ -2,16 +2,22 @@ import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
-  ScrollView,
+  FlatList,
   TouchableOpacity,
   Image,
   StyleSheet,
+  StatusBar,
+  SafeAreaView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import Footer from '../Components/Footer';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
+
+const { width, height } = Dimensions.get('window');
 
 function QuestionsPage() {
   const [activeTab, setActiveTab] = useState('Questions');
@@ -65,127 +71,132 @@ function QuestionsPage() {
   };
 
   return (
-    <View style={[styles.pageContainer, { backgroundColor: currentTheme.background }]}>
-      <View style={[styles.headerContainer, { backgroundColor: currentTheme.secondary}]}>
-        <Text style={[styles.headerText, { color: currentTheme.text }]}>
-          {activeTab === 'Questions' ? 'Questions' : 'Answers'}
-        </Text>
-      </View>
+    <SafeAreaView style={[styles.pageContainer, { backgroundColor: currentTheme.background }]}>
+      <StatusBar 
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'} 
+        backgroundColor={currentTheme.background} 
+      />
+      
+      {/* Header Section - Matching FeedScreen and CalendarView */}
+      <View style={[styles.header, { backgroundColor: currentTheme.background }]}>
+        {/* Top Row with App Name and Icons */}
+        <View style={styles.headerTopRow}>
+          <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Icon name="download-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        
+                 {/* Dynamic Title based on active tab */}
+         <Text style={[styles.questionsTitle, { color: currentTheme.text }]}>
+           {activeTab === 'Questions' ? 'Questions' : 'Answers'}
+         </Text>
+       </View>
 
-      <View style={[styles.contentContainer, { backgroundColor: currentTheme.secondary }]}>
-        <View style={styles.tabsContainer}>
+       <View style={[styles.contentContainer, { backgroundColor: currentTheme.background }]}>
+         <View style={styles.tabsContainer}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'Questions' && styles.activeTab]}
             onPress={() => handleTabChange('Questions')}
           >
-            <Text style={[styles.tabText, activeTab === 'Questions' && styles.activeTabText]}>
-              Questions ({unansweredQuestions.length})
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'Answers' && styles.activeTab]}
-            onPress={() => handleTabChange('Answers')}
-          >
-            <Text style={[styles.tabText, activeTab === 'Answers' && styles.activeTabText]}>
-              Answers ({answeredQuestions.length})
-            </Text>
-          </TouchableOpacity>
+                       <Text style={[styles.tabText, activeTab === 'Questions' && styles.activeTabText]}>
+             Questions ({unansweredQuestions.length})
+           </Text>
+         </TouchableOpacity>
+         <TouchableOpacity
+           style={[styles.tab, activeTab === 'Answers' && styles.activeTab]}
+           onPress={() => handleTabChange('Answers')}
+         >
+           <Text style={[styles.tabText, activeTab === 'Answers' && styles.activeTabText]}>
+             Answered ({answeredQuestions.length})
+           </Text>
+         </TouchableOpacity>
         </View>
 
         <View style={styles.horizontalLine} />
 
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {activeTab === 'Questions' ? (
-            unansweredQuestions.length > 0 ? (
-              unansweredQuestions.map((item) => (
-                <View
-                  key={item.question_id}
-                  style={[
-                    styles.questionContainer,
-                    {
-                      backgroundColor: currentTheme.tertiary,
-                      borderColor: currentTheme.tertiary,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.tagText, { color: currentTheme.primary }]}>
-                    #{item.position}
-                  </Text>
-                  <Text style={[styles.questionText, { color: currentTheme.text }]}>
-                    {item.question}
-                  </Text>
-                  <View style={styles.userContainer}>
-                    <Image
-                      source={{ uri: item.pro_pic }}
-                      style={styles.userAvatar}
-                    />
-                    <Text style={[styles.userName, { color: currentTheme.text }]}>
-                      {item.first_name} {item.last_name}
-                    </Text>
-                  </View>
-
-                  {/* Like button and vote count */}
-                  <View style={styles.likeContainer}>
-                    <TouchableOpacity
-                      style={styles.likeButton}
-                      onPress={() => handleLike(item.question_id)}
-                    >
-                      <Icon name="heart-outline" size={20} color={currentTheme.primary} />
-                      <Text style={[styles.voteText, { color: currentTheme.primary }]}>
-                        {item.like_count || 0} votes
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ))
-            ) : (
-              <Text style={[styles.noDataText, { color: currentTheme.text }]}>
-                No questions available.
-              </Text>
-            )
-          ) : (
-            answeredQuestions.length > 0 ? (
-              answeredQuestions.map((item) => (
-                <View
-                  key={item.question_id}
-                  style={[
-                    styles.answerContainer,
-                    {
-                      backgroundColor: currentTheme.secondary,
-                      borderColor: currentTheme.primary,
-                    },
-                  ]}
-                >
-                  <Text style={[styles.tagText, { color: currentTheme.primary }]}>
-                    #{item.position}
-                  </Text>
-                  <Text style={[styles.answerText, { color: currentTheme.text }]}>
-                    {item.question}
-                  </Text>
-                </View>
-              ))
-            ) : (
-              <Text style={[styles.noDataText, { color: currentTheme.text }]}>
-                No answers available.
-              </Text>
-            )
-          )}
-
-          {/* Ask a Question Button */}
-          {activeTab === 'Questions' && (
-            <TouchableOpacity
-              style={[styles.askButton, { backgroundColor: currentTheme.primary }]}
-              onPress={() => navigation.navigate('AskQuestion', { userName })}
+        <FlatList
+          data={activeTab === 'Questions' ? unansweredQuestions : answeredQuestions}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                activeTab === 'Questions' ? styles.questionContainer : styles.answerContainer,
+                {
+                  backgroundColor: activeTab === 'Questions' ? currentTheme.tertiary : currentTheme.secondary,
+                  borderColor: activeTab === 'Questions' ? currentTheme.tertiary : currentTheme.primary,
+                },
+              ]}
             >
-              <Text style={[styles.askButtonText, { color: currentTheme.text }]}>
-                Ask a Question
+              <Text style={[styles.tagText, { color: currentTheme.primary }]}>
+                #{item.position}
               </Text>
-            </TouchableOpacity>
+              <Text style={[styles.questionText, { color: currentTheme.text }]}>
+                {item.question}
+              </Text>
+              {activeTab === 'Answers' && (
+                <Text style={[styles.answerText, { color: currentTheme.text }]}>
+                  {item.answer}
+                </Text>
+              )}
+              <View style={styles.userContainer}>
+                <Image
+                  source={{ uri: item.pro_pic }}
+                  style={styles.userAvatar}
+                />
+                <Text style={[styles.userName, { color: currentTheme.text }]}>
+                  {item.first_name} {item.last_name}
+                </Text>
+              </View>
+
+              {/* Like button and vote count */}
+              <View style={styles.likeContainer}>
+                <TouchableOpacity
+                  style={styles.likeButton}
+                  onPress={() => handleLike(item.question_id)}
+                >
+                  <Icon name="heart-outline" size={20} color={currentTheme.primary} />
+                  <Text style={[styles.voteText, { color: currentTheme.primary }]}>
+                    {item.like_count || 0} votes
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           )}
-        </ScrollView>
+          keyExtractor={(item) => item.question_id.toString()}
+          showsVerticalScrollIndicator={false}
+                     ListEmptyComponent={() => (
+             <View style={styles.emptyContainer}>
+               <Text style={styles.catEmoji}>🐱</Text>
+               <Text style={[styles.emptyText, { color: currentTheme.text }]}>
+                 {activeTab === 'Questions' ? 'No questions available' : 'No answers available'}
+               </Text>
+               <Text style={[styles.emptySubtext, { color: currentTheme.text }]}>
+                 {activeTab === 'Questions' ? 'Be the first to ask a question!' : 'Check back later for answers'}
+               </Text>
+             </View>
+           )}
+          ListFooterComponent={() => (
+            activeTab === 'Questions' ? (
+              <TouchableOpacity
+                style={[styles.askButton, { backgroundColor: currentTheme.primary }]}
+                onPress={() => navigation.navigate('AskQuestion', { userName })}
+              >
+                <Text style={[styles.askButtonText, { color: '#ffffff' }]}>
+                  Ask a Question
+                </Text>
+              </TouchableOpacity>
+            ) : null
+          )}
+          contentContainerStyle={styles.scrollContainer}
+        />
       </View>
       <Footer />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -199,30 +210,60 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     marginTop: -28.5,
   },
-  headerContainer: {
-    padding: 10,
-    marginBottom: -15,
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 8 : 16,
+    paddingBottom: 8,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
   },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+    paddingTop: Platform.OS === 'ios' ? 2 : 4,
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginLeft: 6,
+  },
+  questionsTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.5,
   },
   contentContainer: {
     flex: 1,
-    padding: 20,
-    
-
+    paddingHorizontal: 20,
+    paddingTop: 4,
   },
   tabsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: 30,
+    marginBottom: 16,
+    paddingVertical: 4,
   },
   tab: {
-    padding: 10,
+    padding: 12,
+    alignItems: 'center',
+    borderBottomWidth: 3,
+    borderBottomColor: 'transparent',
   },
   tabText: {
     fontSize: 16,
+    fontWeight: '500',
+    color: '#666',
   },
   scrollContainer: {
     paddingBottom: 20,
@@ -285,12 +326,32 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   activeTab: {
-    borderBottomWidth: 5, // Underline thickness
-    borderBottomColor: '#4f043d', // Underline color
+    borderBottomColor: '#4A148C',
   },
   activeTabText: {
-    color: '#4f043d', 
-    // Active tab text color
+    color: '#4A148C',
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  catEmoji: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    textAlign: 'center',
+    opacity: 0.7,
   },
   
 });

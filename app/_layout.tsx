@@ -1,12 +1,6 @@
-import { Stack } from "expo-router";
+import React from 'react';
+import { View } from 'react-native';
 
 export default function RootLayout() {
-  return (
-    <Stack>
-      <Stack.Screen
-        name="index"
-        options={{ headerShown: false }} // This will hide the header for the "index" screen
-      />
-    </Stack>
-  );
+  return <View style={{ flex: 1 }} />;
 }

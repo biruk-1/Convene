@@ -1,7 +1,21 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  SafeAreaView,
+  Platform,
+  Dimensions
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { ThemeContext } from '../context/ThemeContext';
-import { lightTheme, darkTheme } from '../context/themes'; // Ensure the path is correct
+import { lightTheme, darkTheme } from '../context/themes';
+import Footer from '../Components/Footer';
+
+const { width, height } = Dimensions.get('window');
 
 const questions = [
   "How do you rate the annual developers conference?",
@@ -32,87 +46,276 @@ const Feedback = () => {
     console.log('Feedback submitted');
   };
 
+  const getOptionColor = (index) => {
+    if (selectedOption === index) {
+      return '#4A148C';
+    }
+    return theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+  };
+
+  const getOptionTextColor = (index) => {
+    if (selectedOption === index) {
+      return '#FFFFFF';
+    }
+    return currentTheme.text;
+  };
+
   return (
-    <View style={[styles.container, { backgroundColor: currentTheme.background }]}>
-      <ScrollView>
-        <Text style={[styles.question, { color: currentTheme.text }]}>{questions[currentQuestion]}</Text>
+    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <StatusBar
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={currentTheme.background}
+      />
+
+      {/* Header Section */}
+      <View style={[styles.header, { backgroundColor: currentTheme.background }]}>
+        {/* Top Row with App Name and Icons */}
+        <View style={styles.headerTopRow}>
+          <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
+              <Icon name="download-outline" size={22} color={currentTheme.text} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Feedback Title */}
+        <Text style={[styles.feedbackTitle, { color: currentTheme.text }]}>Feedback</Text>
+      </View>
+
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Progress Indicator */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+                  backgroundColor: '#4A148C'
+                }
+              ]}
+            />
+          </View>
+          <Text style={[styles.progressText, { color: currentTheme.text }]}>
+            {currentQuestion + 1} of {questions.length}
+          </Text>
+        </View>
+
+        {/* Question Card */}
+        <View style={[styles.questionCard, { backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
+          <Icon name="help-circle-outline" size={32} color="#4A148C" style={styles.questionIcon} />
+          <Text style={[styles.question, { color: currentTheme.text }]}>
+            {questions[currentQuestion]}
+          </Text>
+        </View>
+
+        {/* Options */}
         <View style={styles.optionsContainer}>
           {options.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={[
                 styles.option,
-                { borderColor: currentTheme.primary },
-                selectedOption === index && { backgroundColor: currentTheme.primary },
+                {
+                  backgroundColor: getOptionColor(index),
+                  borderColor: selectedOption === index ? '#4A148C' : 'rgba(0, 0, 0, 0.1)'
+                },
               ]}
               onPress={() => setSelectedOption(index)}
+              activeOpacity={0.7}
             >
-              <Text style={[styles.optionText, { color: currentTheme.text }]}>{option}</Text>
+              <Text style={[styles.optionText, { color: getOptionTextColor(index) }]}>
+                {option}
+              </Text>
+              {selectedOption === index && (
+                <Icon name="checkmark-circle" size={20} color="#FFFFFF" style={styles.checkIcon} />
+              )}
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Pagination Dots */}
         <View style={styles.pagination}>
           {questions.map((_, index) => (
             <View
               key={index}
               style={[
                 styles.dot,
-                { backgroundColor: currentTheme.secondary },
-                currentQuestion === index && { backgroundColor: currentTheme.primary },
+                {
+                  backgroundColor: currentQuestion === index ? '#4A148C' : 'rgba(0, 0, 0, 0.2)',
+                  transform: [{ scale: currentQuestion === index ? 1.2 : 1 }]
+                },
               ]}
             />
           ))}
         </View>
-        {currentQuestion < questions.length - 1 ? (
-          <Button
-            title="Continue"
-            onPress={handleNext}
-            disabled={selectedOption === null}
-            color={currentTheme.primary} // Use theme color for button
+
+        {/* Action Button */}
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            {
+              backgroundColor: selectedOption !== null ? '#4A148C' : 'rgba(0, 0, 0, 0.1)',
+              opacity: selectedOption !== null ? 1 : 0.5
+            }
+          ]}
+          onPress={currentQuestion < questions.length - 1 ? handleNext : handleSubmit}
+          disabled={selectedOption === null}
+          activeOpacity={0.8}
+        >
+          <Text style={[styles.actionButtonText, { color: selectedOption !== null ? '#FFFFFF' : currentTheme.text }]}>
+            {currentQuestion < questions.length - 1 ? 'Continue' : 'Submit Feedback'}
+          </Text>
+          <Icon
+            name={currentQuestion < questions.length - 1 ? "arrow-forward" : "checkmark"}
+            size={20}
+            color={selectedOption !== null ? '#FFFFFF' : currentTheme.text}
+            style={styles.buttonIcon}
           />
-        ) : (
-          <Button
-            title="Submit Feedback"
-            onPress={handleSubmit}
-            color={currentTheme.primary} // Use theme color for button
-          />
-        )}
+        </TouchableOpacity>
       </ScrollView>
-    </View>
+
+      <Footer />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+  },
+  header: {
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 4 : 8,
+  },
+  appName: {
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: -0.3,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    marginLeft: 6,
+  },
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    letterSpacing: -0.5,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    paddingBottom: 100,
+  },
+  progressContainer: {
+    marginBottom: 32,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 3,
+    marginBottom: 12,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 3,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  questionCard: {
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 32,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  questionIcon: {
+    marginBottom: 16,
   },
   question: {
-    fontSize: 18,
-    marginBottom: 20,
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 28,
   },
   optionsContainer: {
-    marginBottom: 20,
+    marginBottom: 32,
   },
   option: {
-    padding: 15,
-    borderWidth: 1,
-    borderRadius: 5,
-    marginVertical: 5,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderWidth: 2,
+    borderRadius: 12,
+    marginVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   optionText: {
-    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+  },
+  checkIcon: {
+    marginLeft: 12,
   },
   pagination: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginVertical: 10,
+    marginBottom: 32,
   },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    margin: 5,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 4,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  buttonIcon: {
+    marginLeft: 4,
   },
 });
 

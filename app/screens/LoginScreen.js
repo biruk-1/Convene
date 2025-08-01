@@ -4,15 +4,15 @@ import {
   Text,
   TextInput,
   Alert,
-  Image,
   TouchableOpacity,
   ActivityIndicator,
   Dimensions,
   Platform,
   KeyboardAvoidingView,
   ScrollView,
+  StatusBar,
+  Image,
 } from 'react-native';
-import { globalStyles } from '../styles/globalStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PropTypes from 'prop-types';
 import { useAuth } from './AuthContext';
@@ -95,77 +95,200 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        contentContainerStyle={[globalStyles.container, { backgroundColor: currentTheme.background }]}
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
       >
-        <Image
-          source={require('../../assets/images/convene-logo.png')}
-          style={globalStyles.logo}
-          resizeMode="contain"
-        />
-        <Text style={[globalStyles.title, { color: currentTheme.text }]}>Login</Text>
-
-        <TextInput
-          style={[
-            globalStyles.input,
-            {
-              backgroundColor: currentTheme.secondary,
-              color: currentTheme.text,
-              borderColor: currentTheme.primary,
-            },
-          ]}
-          placeholder="Email"
-          placeholderTextColor="#b0b0b0"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          style={[
-            globalStyles.input,
-            {
-              backgroundColor: currentTheme.secondary,
-              color: currentTheme.text,
-              borderColor: currentTheme.primary,
-            },
-          ]}
-          placeholder="Password"
-          placeholderTextColor="#b0b0b0"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <TouchableOpacity
-          style={[
-            globalStyles.loginButton,
-            { backgroundColor: currentTheme.primary },
-          ]}
-          onPress={handleLogin}
-          disabled={loading}
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          bounces={false}
         >
-          {loading ? (
-            <ActivityIndicator size="small" color={currentTheme.text} />
-          ) : (
-            <Text style={[globalStyles.buttonText, { color: currentTheme.text }]}>Login</Text>
-          )}
-        </TouchableOpacity>
+          {/* Logo and Brand Section */}
+          <View style={styles.logoSection}>
+            <Image 
+              source={require('../Images/image.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            <Text style={styles.brandText}>Convene</Text>
+          </View>
 
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={[globalStyles.forgotPasswordText, { color: currentTheme.primary }]}>
-            Forgot Password?
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Welcome Section */}
+          <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeText}>Welcome back</Text>
+            <Text style={styles.subtitleText}>Sign in to continue to your events</Text>
+          </View>
+
+          {/* Form Section */}
+          <View style={styles.formSection}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Email Address</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your email"
+                placeholderTextColor="#9CA3AF"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoComplete="email"
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+                autoComplete="password"
+              />
+            </View>
+
+            <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPasswordContainer}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.loginButtonText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Footer Section */}
+          <View style={styles.footerSection}>
+            <Text style={styles.footerText}>A product of Kiburan</Text>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
+};
+
+const styles = {
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
+  },
+  logoSection: {
+    alignItems: 'center',
+    marginTop: height * 0.08, // Responsive top margin
+    marginBottom: 32,
+  },
+  logoImage: {
+    width: 100,
+    height: 100,
+    marginBottom: 16,
+    tintColor: '#4A148C', // This will make the logo purple to match the app theme
+  },
+  brandText: {
+    fontSize: 32,
+    fontWeight: '300',
+    color: '#1F2937',
+    letterSpacing: 2,
+  },
+  welcomeSection: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: '600',
+    color: '#1F2937',
+    marginBottom: 8,
+  },
+  subtitleText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  formSection: {
+    flex: 1,
+    justifyContent: 'flex-start',
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: '#1F2937',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginBottom: 32,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: '#4A148C',
+    textDecorationLine: 'underline',
+  },
+  loginButton: {
+    backgroundColor: '#4A148C',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    shadowColor: '#4A148C',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  loginButtonDisabled: {
+    opacity: 0.7,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
+  },
+  footerSection: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#9CA3AF',
+  },
 };
 
 LoginScreen.propTypes = {
