@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
@@ -48,7 +48,7 @@ const ModernHeader = ({
               onPress={handleBackPress}
               activeOpacity={0.7}
             >
-              <Icon
+              <Ionicons
                 name="chevron-back"
                 size={24}
                 color={currentTheme.text}

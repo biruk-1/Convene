@@ -86,6 +86,10 @@ const ModernButton = ({
     }
 
     if (children) {
+      // Wrap children in Text component if it's a string, otherwise return as is
+      if (typeof children === 'string') {
+        return <Text style={getTextStyle()}>{children}</Text>;
+      }
       return children;
     }
 

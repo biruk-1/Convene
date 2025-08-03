@@ -9,11 +9,13 @@ import {
   StatusBar,
   SafeAreaView,
   Platform,
-  Dimensions
+  Dimensions,
+  KeyboardAvoidingView,
+  ScrollView
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Footer from '../Components/Footer';
+import { Ionicons } from '@expo/vector-icons';
+
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
 
@@ -83,10 +85,10 @@ export default function AskQuestion({ route }) {
           <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
           <View style={styles.headerIcons}>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+              <Ionicons name="notifications-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="download-outline" size={22} color={currentTheme.text} />
+                              <Ionicons name="download-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -95,79 +97,90 @@ export default function AskQuestion({ route }) {
         <Text style={[styles.askQuestionTitle, { color: currentTheme.text }]}>Ask Question</Text>
       </View>
 
-      <View style={styles.contentContainer}>
-        <TextInput
-          placeholder="State your question here..."
-          placeholderTextColor="#b0b0b0"
-          style={[styles.input, { backgroundColor: currentTheme.secondary, color: currentTheme.text }]}
-          multiline
-          value={question}
-          onChangeText={setQuestion}
-        />
-
-      <View style={styles.askOptionsContainer}>
-        <TouchableOpacity
-          style={[
-            styles.askOptionBox,
-            { borderColor: currentTheme.primary },
-            selectedOption === 'user' && { backgroundColor: currentTheme.primary },
-          ]}
-          onPress={() => setSelectedOption('user')}
-        >
-          <Icon
-            name="person-circle-outline"
-            size={30}
-            color={selectedOption === 'user' ? currentTheme.text : currentTheme.primary}
-          />
-          <Text
-            style={[
-              styles.askOptionText,
-              { color: currentTheme.text },
-              selectedOption === 'user' && { color: currentTheme.text, fontWeight: 'bold' },
-            ]}
-          >
-            Ask as <Text style={{ fontWeight: 'bold' }}>{userName}</Text>
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.askOptionBox,
-            { borderColor: currentTheme.primary },
-            selectedOption === 'anonymous' && { backgroundColor: currentTheme.primary },
-          ]}
-          onPress={() => setSelectedOption('anonymous')}
-        >
-          <Icon
-            name="person-outline"
-            size={30}
-            color={selectedOption === 'anonymous' ? currentTheme.text : currentTheme.primary}
-          />
-          <Text
-            style={[
-              styles.askOptionText,
-              { color: currentTheme.text },
-              selectedOption === 'anonymous' && { color: currentTheme.text, fontWeight: 'bold' },
-            ]}
-          >
-            Ask Anonymously
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.submitButton, { backgroundColor: currentTheme.primary }]}
-        onPress={submitQuestion}
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <Text style={[styles.submitButtonText, { color: currentTheme.background }]}>Submit Question</Text>
-      </TouchableOpacity>
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.contentContainer}>
+            <TextInput
+              placeholder="State your question here..."
+              placeholderTextColor="#b0b0b0"
+              style={[styles.input, { backgroundColor: currentTheme.secondary, color: currentTheme.text }]}
+              multiline
+              value={question}
+              onChangeText={setQuestion}
+            />
 
-      <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.cancelButton, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
-        <Text style={[styles.cancelButtonText, { color: currentTheme.primary }]}>Cancel</Text>
-      </TouchableOpacity>
-      
-      <Footer />
-    </View>
+            <View style={styles.askOptionsContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.askOptionBox,
+                  { borderColor: currentTheme.primary },
+                  selectedOption === 'user' && { backgroundColor: currentTheme.primary },
+                ]}
+                onPress={() => setSelectedOption('user')}
+              >
+                <Ionicons
+                  name="person-circle-outline"
+                  size={30}
+                  color={selectedOption === 'user' ? currentTheme.text : currentTheme.primary}
+                />
+                <Text
+                  style={[
+                    styles.askOptionText,
+                    { color: currentTheme.text },
+                    selectedOption === 'user' && { color: currentTheme.text, fontWeight: 'bold' },
+                  ]}
+                >
+                  Ask as <Text style={{ fontWeight: 'bold' }}>{userName}</Text>
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.askOptionBox,
+                  { borderColor: currentTheme.primary },
+                  selectedOption === 'anonymous' && { backgroundColor: currentTheme.primary },
+                ]}
+                onPress={() => setSelectedOption('anonymous')}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={30}
+                  color={selectedOption === 'anonymous' ? currentTheme.text : currentTheme.primary}
+                />
+                <Text
+                  style={[
+                    styles.askOptionText,
+                    { color: currentTheme.text },
+                    selectedOption === 'anonymous' && { color: currentTheme.text, fontWeight: 'bold' },
+                  ]}
+                >
+                  Ask Anonymously
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.submitButton, { backgroundColor: currentTheme.primary }]}
+              onPress={submitQuestion}
+            >
+              <Text style={[styles.submitButtonText, { color: currentTheme.background }]}>Submit Question</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => navigation.goBack()} style={[styles.cancelButton, { backgroundColor: currentTheme.secondary, borderColor: currentTheme.primary }]}>
+              <Text style={[styles.cancelButtonText, { color: currentTheme.primary }]}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -208,6 +221,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     letterSpacing: -0.5,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   contentContainer: {
     flex: 1,

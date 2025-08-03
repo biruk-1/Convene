@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { View, TouchableOpacity, StyleSheet, Animated } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useEventId } from '../context/EventIdContext';
 import { designTokens, modernStyles } from '../styles/modernDesignSystem';
@@ -70,7 +70,7 @@ export default function ModernFooter() {
               isActive && styles.activeIconContainer,
             ]}
           >
-            <Icon
+            <Ionicons
               name={iconName}
               size={24}
               color={isActive ? designTokens.colors.textInverse : designTokens.colors.textSecondary}

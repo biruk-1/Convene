@@ -11,9 +11,10 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../Components/Footer';
+import { useEventId } from '../context/EventIdContext';
+
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
 
@@ -25,27 +26,30 @@ function QuestionsPage() {
   const [answeredQuestions, setAnsweredQuestions] = useState([]);
   const userName = 'Abebe';
   const navigation = useNavigation();
+  const { eventId } = useEventId();
 
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   // Fetch unanswered questions when component mounts
   useEffect(() => {
-    fetchQuestions(
-      'https://zelesegna.com/convene/app/get_questions.php?event=1&status=0',
-      setUnansweredQuestions
-    );
-  }, []);
+    if (eventId) {
+      fetchQuestions(
+        `https://zelesegna.com/convene/app/get_questions.php?event=${eventId}&status=0`,
+        setUnansweredQuestions
+      );
+    }
+  }, [eventId]);
 
   // Fetch answered questions when switching to "Answers" tab
   useEffect(() => {
-    if (activeTab === 'Answers') {
+    if (activeTab === 'Answers' && eventId) {
       fetchQuestions(
-        'https://zelesegna.com/convene/app/get_questions.php?event=1&status=1',
+        `https://zelesegna.com/convene/app/get_questions.php?event=${eventId}&status=1`,
         setAnsweredQuestions
       );
     }
-  }, [activeTab]);
+  }, [activeTab, eventId]);
 
   const fetchQuestions = async (url, updateState) => {
     try {
@@ -84,10 +88,10 @@ function QuestionsPage() {
           <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
           <View style={styles.headerIcons}>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+              <Ionicons name="notifications-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="download-outline" size={22} color={currentTheme.text} />
+                              <Ionicons name="download-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -159,7 +163,7 @@ function QuestionsPage() {
                   style={styles.likeButton}
                   onPress={() => handleLike(item.question_id)}
                 >
-                  <Icon name="heart-outline" size={20} color={currentTheme.primary} />
+                  <Ionicons name="heart-outline" size={20} color={currentTheme.primary} />
                   <Text style={[styles.voteText, { color: currentTheme.primary }]}>
                     {item.like_count || 0} votes
                   </Text>
@@ -195,7 +199,7 @@ function QuestionsPage() {
           contentContainerStyle={styles.scrollContainer}
         />
       </View>
-      <Footer />
+      
     </SafeAreaView>
   );
 }
@@ -211,8 +215,8 @@ const styles = StyleSheet.create({
     marginTop: -28.5,
   },
   header: {
-    paddingTop: Platform.OS === 'ios' ? 8 : 16,
-    paddingBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 12 : 20,
+    paddingBottom: 12,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.08)',
@@ -221,8 +225,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
-    paddingTop: Platform.OS === 'ios' ? 2 : 4,
+    marginBottom: 8,
+    paddingTop: Platform.OS === 'ios' ? 4 : 8,
   },
   appName: {
     fontSize: 18,
@@ -266,7 +270,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   scrollContainer: {
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
   },
   questionContainer: {
     marginBottom: 15,
@@ -322,8 +326,18 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10,
-    marginTop: 10,
+    padding: 16,
+    marginTop: 20,
+    marginBottom: 20,
+    marginHorizontal: 20,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   activeTab: {
     borderBottomColor: '#4A148C',

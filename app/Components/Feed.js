@@ -15,13 +15,16 @@ import {
 import { useRoute } from '@react-navigation/native';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { useEventId } from '../context/EventIdContext';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
 const Feed = () => {
   const route = useRoute();
-  const { eventId } = route.params || {};
+  const { eventId: routeEventId } = route.params || {};
+  const { eventId: contextEventId } = useEventId();
+  const eventId = routeEventId || contextEventId;
 
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -133,25 +136,25 @@ const Feed = () => {
         {/* Post Footer - Full Width Interaction Bar */}
         <View style={[styles.postFooter, { borderTopColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)' }]}>
           <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
-            <Icon name="heart" size={22} color="#FF3B30" />
+                            <Ionicons name="heart" size={22} color="#FF3B30" />
             <Text style={[styles.interactionText, { color: currentTheme.text }]}>
               {item.like_count || 0}
             </Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
-            <Icon name="chatbubble-outline" size={22} color={currentTheme.text} />
+                          <Ionicons name="chatbubble-outline" size={22} color={currentTheme.text} />
             <Text style={[styles.interactionText, { color: currentTheme.text }]}>
               {item.comment_count || 0}
             </Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
-            <Icon name="arrow-redo-outline" size={22} color={currentTheme.text} />
+                          <Ionicons name="arrow-redo-outline" size={22} color={currentTheme.text} />
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.footerIcon} activeOpacity={0.7}>
-            <Icon name="bookmark-outline" size={22} color={currentTheme.text} />
+                          <Ionicons name="bookmark-outline" size={22} color={currentTheme.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -176,7 +179,7 @@ const Feed = () => {
       <Modal visible={modalVisible} transparent={true} animationType="fade">
         <View style={styles.modalContainer}>
           <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalCloseButton}>
-            <Icon name="close" size={24} color="#fff" />
+                          <Ionicons name="close" size={24} color="#fff" />
           </TouchableOpacity>
           {selectedImage && (
             <Image source={{ uri: selectedImage }} style={styles.fullImage} />

@@ -8,12 +8,14 @@ import {
   StatusBar,
   SafeAreaView,
   Platform,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
-import Footer from '../Components/Footer';
+import { useNavigation } from '@react-navigation/native';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,6 +32,7 @@ const options = ["Very Exciting", "Amazing", "Not Bad", "Satisfactory", "Unsatis
 const Feedback = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
+  const navigation = useNavigation();
 
   const theme = useContext(ThemeContext);
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
@@ -44,6 +47,21 @@ const Feedback = () => {
   const handleSubmit = () => {
     // Handle form submission
     console.log('Feedback submitted');
+    
+    // Show success alert
+    Alert.alert(
+      'Success!',
+      'Thank you for your feedback!',
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            // User can navigate back manually
+          }
+        }
+      ],
+      { cancelable: false }
+    );
   };
 
   const getOptionColor = (index) => {
@@ -74,10 +92,10 @@ const Feedback = () => {
           <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
           <View style={styles.headerIcons}>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+              <Ionicons name="notifications-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="download-outline" size={22} color={currentTheme.text} />
+                              <Ionicons name="download-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -111,7 +129,7 @@ const Feedback = () => {
 
         {/* Question Card */}
         <View style={[styles.questionCard, { backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)' }]}>
-          <Icon name="help-circle-outline" size={32} color="#4A148C" style={styles.questionIcon} />
+          <Ionicons name="help-circle-outline" size={32} color="#4A148C" style={styles.questionIcon} />
           <Text style={[styles.question, { color: currentTheme.text }]}>
             {questions[currentQuestion]}
           </Text>
@@ -136,7 +154,7 @@ const Feedback = () => {
                 {option}
               </Text>
               {selectedOption === index && (
-                <Icon name="checkmark-circle" size={20} color="#FFFFFF" style={styles.checkIcon} />
+                <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" style={styles.checkIcon} />
               )}
             </TouchableOpacity>
           ))}
@@ -150,7 +168,11 @@ const Feedback = () => {
               style={[
                 styles.dot,
                 {
-                  backgroundColor: currentQuestion === index ? '#4A148C' : 'rgba(0, 0, 0, 0.2)',
+                  backgroundColor: currentQuestion === index 
+                    ? '#4A148C' 
+                    : theme === 'dark' 
+                      ? 'rgba(255, 255, 255, 0.3)' 
+                      : 'rgba(0, 0, 0, 0.2)',
                   transform: [{ scale: currentQuestion === index ? 1.2 : 1 }]
                 },
               ]}
@@ -174,16 +196,16 @@ const Feedback = () => {
           <Text style={[styles.actionButtonText, { color: selectedOption !== null ? '#FFFFFF' : currentTheme.text }]}>
             {currentQuestion < questions.length - 1 ? 'Continue' : 'Submit Feedback'}
           </Text>
-          <Icon
-            name={currentQuestion < questions.length - 1 ? "arrow-forward" : "checkmark"}
-            size={20}
-            color={selectedOption !== null ? '#FFFFFF' : currentTheme.text}
-            style={styles.buttonIcon}
-          />
+                     <Ionicons
+             name={currentQuestion < questions.length - 1 ? "arrow-forward" : "checkmark"}
+             size={20}
+             color={selectedOption !== null ? '#FFFFFF' : currentTheme.text}
+             style={styles.buttonIcon}
+           />
         </TouchableOpacity>
       </ScrollView>
 
-      <Footer />
+      
     </SafeAreaView>
   );
 };

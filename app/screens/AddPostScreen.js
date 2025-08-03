@@ -16,14 +16,14 @@ import {
   KeyboardAvoidingView
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { setImage, setContent, clearImage, uploadImage } from '../imageSlice';
 import { useEventId } from '../context/EventIdContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
 import { useNavigation } from '@react-navigation/native';
-import Footer from '../Components/Footer';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -183,12 +183,12 @@ const AddPostScreen = () => {
                        setImagePreview(null);
                      }}
                    >
-                     <Icon name="close-circle" size={24} color="#FF3B30" />
+                                           <Ionicons name="close-circle" size={24} color="#FF3B30" />
                    </TouchableOpacity>
                  </View>
                ) : (
                  <View style={[styles.imagePlaceholder, { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#f8f9fa' }]}>
-                   <Icon name="camera-outline" size={48} color="#999" />
+                                       <Ionicons name="camera-outline" size={48} color="#999" />
                    <Text style={[styles.placeholderText, { color: currentTheme.text }]}>
                      Add a photo to your post
                    </Text>
@@ -197,14 +197,14 @@ const AddPostScreen = () => {
                        style={[styles.imageButton, { backgroundColor: '#4A148C' }]}
                        onPress={() => pickImage('camera')}
                      >
-                       <Icon name="camera" size={20} color="#fff" />
+                                               <Ionicons name="camera" size={20} color="#fff" />
                        <Text style={styles.imageButtonText}>Camera</Text>
                      </TouchableOpacity>
                      <TouchableOpacity 
                        style={[styles.imageButton, { backgroundColor: '#4A148C' }]}
                        onPress={() => pickImage('gallery')}
                      >
-                       <Icon name="images" size={20} color="#fff" />
+                                               <Ionicons name="images" size={20} color="#fff" />
                        <Text style={styles.imageButtonText}>Gallery</Text>
                      </TouchableOpacity>
                    </View>
@@ -238,7 +238,7 @@ const AddPostScreen = () => {
            </ScrollView>
          </KeyboardAvoidingView>
 
-         <Footer />
+ 
      </SafeAreaView>
   );
 };

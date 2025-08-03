@@ -12,7 +12,7 @@ import {
   Platform,
   SafeAreaView
 } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { useEventId } from '../context/EventIdContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
@@ -44,7 +44,8 @@ const EventList = ({ navigation, route }) => {
 
         if (!response.ok) {
           console.error('Network response was not ok');
-          Alert.alert('Failed to load events', 'Please try again later.');
+          // Don't show alert, just log the error
+          console.log('Failed to load events from API');
           return;
         }
 
@@ -52,7 +53,8 @@ const EventList = ({ navigation, route }) => {
         if (!contentType || !contentType.includes('application/json')) {
           const responseText = await response.text();
           console.log('Unexpected response format:', responseText);
-          Alert.alert('Failed to load events', 'Unexpected response format from the server.');
+          // Don't show alert, just log the error
+          console.log('Unexpected response format from server');
           return;
         }
 
@@ -61,11 +63,12 @@ const EventList = ({ navigation, route }) => {
         if (eventData.status === 'success' && Array.isArray(eventData.result)) {
           setEvents(eventData.result);
         } else {
-          Alert.alert('Failed to load events', eventData.result || 'Invalid request.');
+          console.log('API returned error:', eventData.result || 'Invalid request.');
         }
       } catch (error) {
         console.error('Error fetching events:', error);
-        Alert.alert('Error loading events', 'Please check your internet connection.');
+        // Don't show alert, just log the error
+        console.log('Network error while fetching events');
       } finally {
         setLoading(false);
       }
@@ -86,7 +89,7 @@ const EventList = ({ navigation, route }) => {
       ]}
       onPress={() => {
         setEventId(item.event_id);
-        navigation.navigate('Feed', { eventId: item.event_id });
+        navigation.replace('MainTabs');
       }}
       activeOpacity={0.8}
     >
@@ -114,7 +117,7 @@ const EventList = ({ navigation, route }) => {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconContainer}>
-        <Icon name="calendar-outline" size={64} color="#4A148C" />
+                      <Ionicons name="calendar-outline" size={64} color="#4A148C" />
       </View>
       <Text style={[styles.emptyTitle, { color: currentTheme.text }]}>
         No Events Available

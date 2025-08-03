@@ -11,7 +11,7 @@ import {
   ScrollView
 } from 'react-native';
 import Feed from '../Components/Feed';
-import Footer from '../Components/Footer';
+
 import FeedbackHeader from './FeedbackHeader';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
@@ -60,8 +60,7 @@ const FeedScreen = () => {
         <Feed />
       </ScrollView>
       
-      {/* Modern Footer */}
-      <Footer />
+
     </SafeAreaView>
   );
 };
@@ -107,7 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 0, // Remove extra padding to fix footer spacing
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100, // Add padding to ensure footer is visible
   },
 });
 

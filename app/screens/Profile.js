@@ -13,14 +13,16 @@ import {
   Dimensions
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Footer from '../Components/Footer';
+import { Ionicons } from '@expo/vector-icons';
+
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
 import { useAuth } from './AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
+const isSmallDevice = width < 375;
+const isLargeDevice = width > 414;
 
 const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -61,9 +63,16 @@ const Profile = ({ navigation }) => {
         {
           text: "Logout",
           style: "destructive",
-          onPress: () => {
-            logout(); // Clear session and navigate to login screen
-            navigation.replace('Login'); // Navigate to Login screen
+          onPress: async () => {
+            const logoutSuccess = await logout();
+            if (logoutSuccess) {
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } else {
+              Alert.alert('Logout Error', 'Failed to logout properly. Please try again.');
+            }
           },
         },
       ]
@@ -83,10 +92,10 @@ const Profile = ({ navigation }) => {
           <Text style={[styles.appName, { color: currentTheme.text }]}>Convene</Text>
           <View style={styles.headerIcons}>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="notifications-outline" size={22} color={currentTheme.text} />
+              <Ionicons name="notifications-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.7}>
-              <Icon name="settings-outline" size={22} color={currentTheme.text} />
+              <Ionicons name="settings-outline" size={22} color={currentTheme.text} />
             </TouchableOpacity>
           </View>
         </View>
@@ -109,7 +118,7 @@ const Profile = ({ navigation }) => {
               style={styles.profileImage}
             />
             <TouchableOpacity style={styles.editImageButton} activeOpacity={0.8}>
-              <Icon name="camera" size={16} color="#fff" />
+              <Ionicons name="camera" size={16} color="#fff" />
             </TouchableOpacity>
           </View>
           
@@ -174,20 +183,21 @@ const Profile = ({ navigation }) => {
           />
         </View>
 
-        {/* Logout Section */}
+        {/* Logout Section - Fixed positioning */}
         <View style={[styles.logoutSection, { backgroundColor: currentTheme.background }]}>
           <TouchableOpacity 
             style={[styles.logoutButton, { backgroundColor: theme === 'dark' ? '#1a1a1a' : '#f8f9fa' }]} 
             onPress={handleLogout}
             activeOpacity={0.7}
           >
-            <Icon name="log-out-outline" size={20} color="#FF3B30" />
+            <Ionicons name="log-out-outline" size={20} color="#FF3B30" />
             <Text style={[styles.logoutText, { color: '#FF3B30' }]}>Logout</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
 
-      <Footer />
+        {/* Extra padding to ensure logout button is above tab bar */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -201,14 +211,14 @@ const MenuItem = ({ icon, title, subtitle, theme, onPress }) => {
     >
       <View style={styles.menuItemLeft}>
         <View style={[styles.iconContainer, { backgroundColor: theme === 'dark' ? 'rgba(74, 20, 140, 0.2)' : 'rgba(74, 20, 140, 0.1)' }]}>
-          <Icon name={icon} size={20} color="#4A148C" />
+          <Ionicons name={icon} size={20} color="#4A148C" />
         </View>
         <View style={styles.menuItemText}>
           <Text style={[styles.menuTitle, { color: theme.text }]}>{title}</Text>
           {subtitle && <Text style={[styles.menuSubtitle, { color: theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)' }]}>{subtitle}</Text>}
         </View>
       </View>
-      <Icon name="chevron-forward" size={20} color={theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)'} />
+      <Ionicons name="chevron-forward" size={20} color={theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.4)'} />
     </TouchableOpacity>
   );
 };
@@ -254,11 +264,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 0, // Removed padding to let bottomPadding handle it
   },
   profileHeader: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: isSmallDevice ? 24 : 32,
     paddingHorizontal: 20,
   },
   profileImageContainer: {
@@ -266,9 +276,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: isSmallDevice ? 100 : isLargeDevice ? 140 : 120,
+    height: isSmallDevice ? 100 : isLargeDevice ? 140 : 120,
+    borderRadius: isSmallDevice ? 50 : isLargeDevice ? 70 : 60,
     borderWidth: 4,
     borderColor: '#4A148C',
   },
@@ -278,8 +288,8 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: '#4A148C',
     borderRadius: 20,
-    width: 40,
-    height: 40,
+    width: isSmallDevice ? 32 : 40,
+    height: isSmallDevice ? 32 : 40,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
@@ -289,19 +299,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userName: {
-    fontSize: 24,
+    fontSize: isSmallDevice ? 20 : isLargeDevice ? 28 : 24,
     fontWeight: '700',
     marginBottom: 4,
     textAlign: 'center',
   },
   userEmail: {
-    fontSize: 16,
+    fontSize: isSmallDevice ? 14 : 16,
     opacity: 0.7,
     marginBottom: 4,
     textAlign: 'center',
   },
   userPosition: {
-    fontSize: 14,
+    fontSize: isSmallDevice ? 12 : 14,
     opacity: 0.6,
     textAlign: 'center',
   },
@@ -309,29 +319,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingHorizontal: 20,
-    marginBottom: 32,
+    marginBottom: isSmallDevice ? 24 : 32,
   },
   statItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 20,
-    marginHorizontal: 8,
+    paddingVertical: isSmallDevice ? 16 : 20,
+    marginHorizontal: 6,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.08)',
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: isSmallDevice ? 20 : isLargeDevice ? 28 : 24,
     fontWeight: '700',
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: isSmallDevice ? 12 : 14,
     opacity: 0.7,
   },
   menuContainer: {
     marginHorizontal: 20,
-    marginBottom: 32,
+    marginBottom: isSmallDevice ? 24 : 32,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.08)',
@@ -341,7 +351,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
+    paddingVertical: isSmallDevice ? 14 : 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
   },
@@ -351,8 +361,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
+    width: isSmallDevice ? 36 : 40,
+    height: isSmallDevice ? 36 : 40,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -362,29 +372,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuTitle: {
-    fontSize: 16,
+    fontSize: isSmallDevice ? 14 : 16,
     fontWeight: '600',
     marginBottom: 2,
   },
   menuSubtitle: {
-    fontSize: 14,
+    fontSize: isSmallDevice ? 12 : 14,
   },
   logoutSection: {
     paddingHorizontal: 20,
+    marginBottom: 20,
   },
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: isSmallDevice ? 14 : 16,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 59, 48, 0.2)',
   },
   logoutText: {
-    fontSize: 16,
+    fontSize: isSmallDevice ? 14 : 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  bottomPadding: {
+    height: Platform.OS === 'ios' ? 120 : 100, // Ensure enough space above tab bar
   },
 });
 

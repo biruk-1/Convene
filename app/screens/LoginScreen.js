@@ -72,13 +72,14 @@ const LoginScreen = ({ navigation }) => {
           name: data.name,
           profilePhoto: data.profile_photo,
         };
-        login(userData);
-
-        await AsyncStorage.setItem('isLoggedIn', 'true');
-        await AsyncStorage.setItem('userId', data.participant);
-        await AsyncStorage.setItem('userData', JSON.stringify(userData));
-
-        navigation.navigate('EventList', { participantId: data.participant });
+        
+        const loginSuccess = await login(userData);
+        
+        if (loginSuccess) {
+          navigation.replace('EventList', { participantId: data.participant });
+        } else {
+          Alert.alert('Login Error', 'Failed to save login session. Please try again.');
+        }
       } else {
         Alert.alert('Invalid credentials', 'Please check your email and password and try again.');
       }

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { PanGestureHandler, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
-import Footer from '../Components/Footer';
+
 import dayjs from 'dayjs';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
@@ -285,7 +285,7 @@ const CalendarView = () => {
           />
         </View>
         
-        <Footer />
+
       </SafeAreaView>
     </GestureHandlerRootView>
   );
@@ -321,6 +321,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     letterSpacing: -0.5,
+    marginTop: 8,
   },
   headerIcons: {
     flexDirection: 'row',

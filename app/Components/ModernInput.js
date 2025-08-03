@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeContext } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../context/themes';
 import { designTokens, modernStyles } from '../styles/modernDesignSystem';
@@ -79,7 +79,7 @@ const ModernInput = ({
           onPress={handlePasswordToggle}
           activeOpacity={0.7}
         >
-          <Icon
+          <Ionicons
             name={showPassword ? 'eye-off' : 'eye'}
             size={20}
             color={designTokens.colors.textSecondary}
@@ -96,7 +96,7 @@ const ModernInput = ({
           activeOpacity={0.7}
           disabled={!onRightIconPress}
         >
-          <Icon
+          <Ionicons
             name={rightIcon}
             size={20}
             color={designTokens.colors.textSecondary}
@@ -119,7 +119,7 @@ const ModernInput = ({
       <View style={[styles.inputContainer, { borderColor: getBorderColor() }]}>
         {leftIcon && (
           <View style={styles.leftIconContainer}>
-            <Icon
+            <Ionicons
               name={leftIcon}
               size={20}
               color={designTokens.colors.textSecondary}
